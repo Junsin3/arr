@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{clccc}
+\toprule
+ID & 체크포인트 & PT & IT & Traj \\
+\midrule
+C0 & Base & -- & -- & -- \\
+C1 & Short PT & Short & -- & -- \\
+C2 & Long PT & Long & -- & -- \\
+C3 & Base + IT & -- & \checkmark & -- \\
+C4 & Short PT + IT & Short & \checkmark & -- \\
+C5 & Long PT + IT & Long & \checkmark & -- \\
+C6 & Base + IT + Traj & -- & \checkmark & \checkmark \\
+C7 & Short + IT + Traj & Short & \checkmark & \checkmark \\
+C8 & Long + IT + Traj & Long & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{평가할 아홉 개 체크포인트.} 중간 체크포인트를
+보존하여 PT 효과가 나타나는 지점과 후속 학습 이후의 유지 여부를
+분리한다.}
+\label{tab:checkpoints}
+\end{table}

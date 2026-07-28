@@ -1,0 +1,39 @@
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw, rounded corners=2pt, align=center, minimum height=9mm,
+              inner xsep=6pt},
+  arrow/.style={-{Latex[length=2.2mm]}, thick},
+  eval/.style={draw, dashed, rounded corners=2pt, align=center, inner sep=5pt}
+]
+\node[box, fill=stagegray] (c0) {C0\\Base};
+\node[box, fill=shortblue, above right=7mm and 13mm of c0] (c1) {C1\\Short PT};
+\node[box, fill=longorange, below right=7mm and 13mm of c0] (c2) {C2\\Long PT};
+\node[box, fill=stagegray, right=28mm of c0] (c3) {C3\\Base+IT};
+\node[box, fill=shortblue, right=17mm of c1] (c4) {C4\\Short+IT};
+\node[box, fill=longorange, right=17mm of c2] (c5) {C5\\Long+IT};
+\node[box, fill=stagegreen, right=18mm of c3] (c6) {C6\\Base+IT+Traj};
+\node[box, fill=stagegreen, right=18mm of c4] (c7) {C7\\Short+IT+Traj};
+\node[box, fill=stagegreen, right=18mm of c5] (c8) {C8\\Long+IT+Traj};
+
+\draw[arrow] (c0) -- node[above,sloped]{Short PT} (c1);
+\draw[arrow] (c0) -- node[below,sloped]{Long PT} (c2);
+\draw[arrow] (c0) -- node[above]{공통 IT} (c3);
+\draw[arrow] (c1) -- node[above]{공통 IT} (c4);
+\draw[arrow] (c2) -- node[above]{공통 IT} (c5);
+\draw[arrow] (c3) -- node[above]{공통 Traj} (c6);
+\draw[arrow] (c4) -- node[above]{공통 Traj} (c7);
+\draw[arrow] (c5) -- node[above]{공통 Traj} (c8);
+
+\node[eval, fit=(c0)(c1)(c2)(c3)(c4)(c5),
+      label={[font=\scriptsize]above:웹 이해ㆍ그라운딩ㆍ일반화 평가}] {};
+\node[eval, fit=(c6)(c7)(c8),
+      label={[font=\scriptsize]above:에이전트 평가}] {};
+\end{tikzpicture}
+\caption{\textbf{단계별 학습 및 평가 파이프라인.} C0--C5는 PT
+효과의 발생과 IT 이후 유지 여부를 측정한다. C6--C8은 동일한 행동
+궤적 학습 후 서술 상세도가 최종 웹 에이전트에 미치는 영향을
+비교한다.}
+\label{fig:pipeline}
+\end{figure*}

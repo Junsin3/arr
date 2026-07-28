@@ -81,37 +81,7 @@ VisualWebBench는 현재 멀티모달 모델이 웹페이지 OCR, 세부 이해,
 \ref{fig:contrast}는 본 연구의 두 supervision 조건과 공통으로
 통제되는 요소를 요약한다.
 
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[
-  font=\scriptsize,
-  box/.style={draw, rounded corners=2pt, align=center, inner sep=4pt},
-  arrow/.style={-{Latex[length=2mm]}, thick},
-  node distance=4mm
-]
-\node[box, fill=stagegray, minimum width=.91\columnwidth] (input)
-  {동일한 웹 스크린샷 + 동일한 Stage-1 구조화 사실\\
-   \texttt{page\_type, visible\_facts, affordances, coordinates}};
-\node[box, fill=shortblue, below left=6mm and 1mm of input,
-      text width=.39\columnwidth] (short)
-  {\textbf{Short PT}\\3--5문장, 평균 110단어\\핵심 목적ㆍ상태 선택\\상호작용 목표 최대 2개};
-\node[box, fill=longorange, below right=6mm and 1mm of input,
-      text width=.39\columnwidth] (long)
-  {\textbf{Long PT}\\평균 3,656자\\모든 사실ㆍ행동 보존\\표와 좌표까지 포괄적 서술};
-\node[box, fill=stagegreen, below=7mm of $(short.south)!0.5!(long.south)$,
-      minimum width=.91\columnwidth] (control)
-  {공통 통제: 123만 grounding 예제, 0--999 좌표계,\\
-   9B backbone, optimizer, IT 데이터, trajectory 데이터};
-\draw[arrow] (input.south) -- (short.north);
-\draw[arrow] (input.south) -- (long.north);
-\draw[arrow] (short.south) -- (control.north west);
-\draw[arrow] (long.south) -- (control.north east);
-\end{tikzpicture}
-\caption{\textbf{서술 상세도 비교의 개념도.} 두 조건은 같은 화면과
-구조화 사실에서 출발하며, 무엇을 얼마나 남겨 서술하는지만 다르다.
-그라운딩 데이터와 후속 학습은 동일하게 유지한다.}
-\label{fig:contrast}
-\end{figure}
+\input{figures/supervision_contrast}
 
 본 연구는 \textbf{간결한 설명(Concise)}과 \textbf{포괄적
 설명(Comprehensive)}을 비교한다. 두 조건은 스크린샷, 1단계 구조화
@@ -206,26 +176,7 @@ Short prompt는 3--5문장, 약 90--130단어로 페이지 유형, 주된 목적
 정보를 선택하고 압축한다. 최종 데이터는 143,097건이며 평균
 110.2단어, 4.24문장이다.
 
-\begin{table}[t]
-\centering
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{lrr}
-\toprule
- & Short & Long \\
-\midrule
-화면 설명 수 & 143,097 & 147,967 \\
-평균 설명 길이 & 110.2단어 & 3,656자 \\
-그라운딩 예제 & 1,228,336 & 1,228,336 \\
-전체 PT 예제 & 1,371,433 & 1,376,303 \\
-설명 예제 비율 & 10.43\% & 10.75\% \\
-\bottomrule
-\end{tabular}
-\caption{\textbf{사전학습 데이터 구성.} 두 조건은 같은 그라운딩
-데이터와 좌표계를 공유한다. 화면 설명 수가 4,870건 다른 점은
-한계에서 논의한다.}
-\label{tab:data}
-\end{table}
+\input{tables/data_composition}
 
 \paragraph{프로그램 기반 검증.}
 모든 Short 생성 결과의 좌표를 Stage-1 좌표 집합과 대조한다.
@@ -266,74 +217,13 @@ LLaVA-NeXT에서 DocVQA, ChartQA, DVQA, AI2D 출처를 제거한다. 세 IT
 \texttt{scroll}, \texttt{goto}, \texttt{go\_back}, \texttt{finish}의
 일곱 가지로 통일한다.
 
-\begin{figure*}[t]
-\centering
-\begin{tikzpicture}[
-  font=\small,
-  box/.style={draw, rounded corners=2pt, align=center, minimum height=9mm,
-              inner xsep=6pt},
-  arrow/.style={-{Latex[length=2.2mm]}, thick},
-  eval/.style={draw, dashed, rounded corners=2pt, align=center, inner sep=5pt}
-]
-\node[box, fill=stagegray] (c0) {C0\\Base};
-\node[box, fill=shortblue, above right=7mm and 13mm of c0] (c1) {C1\\Short PT};
-\node[box, fill=longorange, below right=7mm and 13mm of c0] (c2) {C2\\Long PT};
-\node[box, fill=stagegray, right=28mm of c0] (c3) {C3\\Base+IT};
-\node[box, fill=shortblue, right=17mm of c1] (c4) {C4\\Short+IT};
-\node[box, fill=longorange, right=17mm of c2] (c5) {C5\\Long+IT};
-\node[box, fill=stagegreen, right=18mm of c3] (c6) {C6\\Base+IT+Traj};
-\node[box, fill=stagegreen, right=18mm of c4] (c7) {C7\\Short+IT+Traj};
-\node[box, fill=stagegreen, right=18mm of c5] (c8) {C8\\Long+IT+Traj};
-
-\draw[arrow] (c0) -- node[above,sloped]{Short PT} (c1);
-\draw[arrow] (c0) -- node[below,sloped]{Long PT} (c2);
-\draw[arrow] (c0) -- node[above]{공통 IT} (c3);
-\draw[arrow] (c1) -- node[above]{공통 IT} (c4);
-\draw[arrow] (c2) -- node[above]{공통 IT} (c5);
-\draw[arrow] (c3) -- node[above]{공통 Traj} (c6);
-\draw[arrow] (c4) -- node[above]{공통 Traj} (c7);
-\draw[arrow] (c5) -- node[above]{공통 Traj} (c8);
-
-\node[eval, fit=(c0)(c1)(c2)(c3)(c4)(c5),
-      label={[font=\scriptsize]above:웹 이해ㆍ그라운딩ㆍ일반화 평가}] {};
-\node[eval, fit=(c6)(c7)(c8),
-      label={[font=\scriptsize]above:에이전트 평가}] {};
-\end{tikzpicture}
-\caption{\textbf{단계별 학습 및 평가 파이프라인.} C0--C5는 PT
-효과의 발생과 IT 이후 유지 여부를 측정한다. C6--C8은 동일한 행동
-궤적 학습 후 서술 상세도가 최종 웹 에이전트에 미치는 영향을
-비교한다.}
-\label{fig:pipeline}
-\end{figure*}
+\input{figures/training_pipeline}
 
 그림 \ref{fig:pipeline}과 표 \ref{tab:checkpoints}는 전체 비교 구조를
 보여준다. PT가 없는 분기는 PT 자체의 효과와 Short/Long 간 차이를
 분리하는 기준선이다.
 
-\begin{table}[t]
-\centering
-\small
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{clccc}
-\toprule
-ID & 체크포인트 & PT & IT & Traj \\
-\midrule
-C0 & Base & -- & -- & -- \\
-C1 & Short PT & Short & -- & -- \\
-C2 & Long PT & Long & -- & -- \\
-C3 & Base + IT & -- & \checkmark & -- \\
-C4 & Short PT + IT & Short & \checkmark & -- \\
-C5 & Long PT + IT & Long & \checkmark & -- \\
-C6 & Base + IT + Traj & -- & \checkmark & \checkmark \\
-C7 & Short + IT + Traj & Short & \checkmark & \checkmark \\
-C8 & Long + IT + Traj & Long & \checkmark & \checkmark \\
-\bottomrule
-\end{tabular}
-\caption{\textbf{평가할 아홉 개 체크포인트.} 중간 체크포인트를
-보존하여 PT 효과가 나타나는 지점과 후속 학습 이후의 유지 여부를
-분리한다.}
-\label{tab:checkpoints}
-\end{table}
+\input{tables/checkpoints}
 
 \subsection{연구 질문}
 
@@ -357,49 +247,8 @@ Multimodal-Mind2Web이며 cross-task, cross-website, cross-domain
 
 \subsection{주요 결과 (진행 중)}
 
-\begin{table*}[t]
-\centering
-\small
-\resizebox{\textwidth}{!}{
-\begin{tabular}{lcccccccc}
-\toprule
-모델 & VWB-U $\uparrow$ & VWB-G $\uparrow$ & WebSRC $\uparrow$ &
-WebClick $\uparrow$ & ScreenSpot-v2 $\uparrow$ & Korean Web $\uparrow$ &
-DocVQA $\uparrow$ & ChartQA $\uparrow$ \\
-\midrule
-C0 Base & -- & -- & -- & -- & -- & -- & -- & -- \\
-C1 Short PT & -- & -- & -- & -- & -- & -- & -- & -- \\
-C2 Long PT & -- & -- & -- & -- & -- & -- & -- & -- \\
-C3 Base + IT & -- & -- & -- & -- & -- & -- & -- & -- \\
-C4 Short PT + IT & -- & -- & -- & -- & -- & -- & -- & -- \\
-C5 Long PT + IT & -- & -- & -- & -- & -- & -- & -- & -- \\
-\bottomrule
-\end{tabular}}
-\caption{\textbf{웹 이해, 그라운딩 및 일반화 결과.} VWB-U와 VWB-G는
-각각 VisualWebBench의 understanding과 grounding을 뜻한다. 표의
-대시는 진행 중인 평가 결과를 입력하기 위한 자리표시자이다.}
-\label{tab:main}
-\end{table*}
-
-\begin{table}[t]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\columnwidth}{@{}Xccc@{}}
-\toprule
-모델 & Task & Website & Domain \\
-\midrule
-C6 No PT & -- & -- & -- \\
-C7 Short PT & -- & -- & -- \\
-C8 Long PT & -- & -- & -- \\
-\bottomrule
-\end{tabularx}
-\caption{\textbf{Multimodal-Mind2Web 에이전트 결과.} 열은 각각
-cross-task, cross-website, cross-domain 분할을 나타낸다. 열 제목을
-축약하고 표 폭을 \texttt{\string\columnwidth}로 고정하여 단일 칼럼
-경계를 넘지 않도록 구성하였다.}
-\label{tab:agent}
-\end{table}
+\input{tables/main_results}
+\input{tables/agent_results}
 
 하나의 종합 점수만으로 결론을 선택하지 않는다. 예를 들어 Long
 caption은 이해 성능에는 유리하지만 정밀 그라운딩에는 불리할 수
