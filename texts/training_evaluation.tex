@@ -1,0 +1,66 @@
+\section{학습 및 평가}
+
+\subsection{학습 단계}
+
+기반 모델은 Qwen3.5-9B이다. 모든 PT에서 전체 파라미터를 1 epoch
+학습하며 bfloat16, cosine learning rate $10^{-5}$, warmup 3\%,
+completion-only loss, 최대 길이 8192, effective batch size 256을
+사용한다. 이미지는 최대 2,359,296 pixel로 입력하며 현재 해상도에서
+3,009 image token에 해당한다. 모든 PT run에 gradient checkpointing을
+적용한다.
+
+PT 이후 Base, Short PT, Long PT 모델은 같은 순서의 100K IT 예제를
+학습한다. 이 데이터는 MolmoWeb SyntheticQA 70K와 필터링한
+LLaVA-NeXT 30K로 구성한다. 후속 일반화 평가와의 중복을 막기 위해
+LLaVA-NeXT에서 DocVQA, ChartQA, DVQA, AI2D 출처를 제거한다. 세 IT
+체크포인트에는 다시 동일한 99,999개의 trajectory 예제를 학습한다.
+행동 공간은 \texttt{click}, \texttt{type}, \texttt{press},
+\texttt{scroll}, \texttt{goto}, \texttt{go\_back}, \texttt{finish}의
+일곱 가지로 통일한다.
+
+\input{figures/training_pipeline}
+
+그림 \ref{fig:pipeline}과 표 \ref{tab:checkpoints}는 전체 비교 구조를
+보여준다. PT가 없는 분기는 PT 자체의 효과와 Short/Long 간 차이를
+분리하는 기준선이다.
+
+\input{tables/checkpoints}
+
+\subsection{연구의 의문과 가설}
+
+본 연구는 포괄적인 화면 설명이 간결한 설명보다 풍부한 웹 표현을
+형성하는지에서 출발한다. Long PT가 화면의 세부 텍스트와 상태,
+상호작용 요소를 더 많이 보존하므로, 첫 번째 가설은 그 이점이 PT
+직후의 웹페이지 이해에서 가장 뚜렷하게 나타난다는 것이다. 다만
+많은 정보를 나열하는 목표가 핵심 요소의 위치를 찾는 능력에도
+유리한지는 자명하지 않으므로 이해와 그라운딩을 분리해 측정한다.
+
+두 번째 의문은 PT에서 생긴 차이가 공통 IT 이후에도 남는가이다.
+과제특화 질의응답과 명령어 supervision이 초기 표현의 차이를
+덮어쓴다면 PT 직후의 우위가 최종 모델에는 이어지지 않을 수 있다.
+마지막으로 동일한 행동 궤적까지 학습한 뒤 C6--C8을 비교하여,
+서술 상세도의 영향이 실제 trajectory-following agent와 비웹
+텍스트 밀집 이미지로의 전이까지 이어지는지 확인한다.
+
+\subsection{평가 벤치마크}
+
+C0--C5는 VisualWebBench의 이해와 그라운딩을 분리하여 평가하고,
+WebSRC, WebClick, ScreenSpot-v2, 한국어 웹 벤치마크를 함께
+사용한다. DocVQA의 ANLS와 ChartQA의 relaxed accuracy로 비웹 텍스트
+밀집 시각 이해 전이를 측정한다. C6--C8의 주요 에이전트 평가는
+Multimodal-Mind2Web이며 cross-task, cross-website, cross-domain
+분할을 각각 보고한다. 좌표 출력은 모든 평가에서 0--999 규약으로
+해석한다.
+
+\subsection{주요 결과 (진행 중)}
+
+\input{tables/main_results}
+\input{tables/agent_results}
+
+하나의 종합 점수만으로 결론을 선택하지 않는다. 예를 들어 Long
+caption은 이해 성능에는 유리하지만 정밀 그라운딩에는 불리할 수
+있고, PT 직후의 차이가 IT 이후 사라질 수도 있다. 따라서 C1--C2,
+C4--C5, C7--C8을 각각 비교하고 C0, C3, C6으로 PT 자체의 한계
+효과를 측정한다. 벤치마크가 허용하는 경우 paired bootstrap
+confidence interval을 보고한다. 다만 학습 seed가 하나이므로 통계적
+주장은 run 간 분산이 아니라 평가 표본의 불확실성으로 제한한다.

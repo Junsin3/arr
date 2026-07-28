@@ -1,23 +1,23 @@
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-  font=\scriptsize,
+  font=\footnotesize,
   box/.style={draw, rounded corners=2pt, align=center, inner sep=4pt},
   arrow/.style={-{Latex[length=2mm]}, thick},
   node distance=4mm
 ]
-\node[box, fill=stagegray, minimum width=.91\columnwidth] (input)
+\node[box, fill=stagegray, text width=.84\columnwidth] (input)
   {동일한 웹 스크린샷 + 동일한 Stage-1 구조화 사실\\
    \texttt{page\_type, visible\_facts, affordances, coordinates}};
 \node[box, fill=shortblue, below left=6mm and 1mm of input,
-      text width=.39\columnwidth] (short)
+      text width=.34\columnwidth] (short)
   {\textbf{Short PT}\\3--5문장, 평균 110단어\\핵심 목적ㆍ상태 선택\\상호작용 목표 최대 2개};
 \node[box, fill=longorange, below right=6mm and 1mm of input,
-      text width=.39\columnwidth] (long)
+      text width=.34\columnwidth] (long)
   {\textbf{Long PT}\\평균 3,656자\\모든 사실ㆍ행동 보존\\표와 좌표까지 포괄적 서술};
 \node[box, fill=stagegreen, below=7mm of $(short.south)!0.5!(long.south)$,
-      minimum width=.91\columnwidth] (control)
-  {공통 통제: 123만 grounding 예제, 0--999 좌표계,\\
+      text width=.84\columnwidth] (control)
+  {공통 통제: 1.2M grounding 예제, 0--999 좌표계,\\
    9B backbone, optimizer, IT 데이터, trajectory 데이터};
 \draw[arrow] (input.south) -- (short.north);
 \draw[arrow] (input.south) -- (long.north);
