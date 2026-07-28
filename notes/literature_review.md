@@ -13,6 +13,44 @@
 
 ## 논문별 정리
 
+### Dense and Aligned Captions (DAC) (Doveh et al., 2023)
+
+- 논문: https://arxiv.org/abs/2305.19595
+- 일반 이미지--텍스트 사전학습에서 caption의 두 속성, 즉
+  image--text alignment와 화면 세부사항을 얼마나 빠짐없이 언급하는지
+  나타내는 density가 compositional reasoning을 제한할 수 있다고
+  분석한다.
+- CC3M caption을 더 dense하고 image-aligned하게 보정해 CLIP을
+  미세조정했을 때 compositional reasoning 성능이 base model보다
+  최대 약 27%, 가장 강한 baseline보다 최대 약 20% 향상되었다고
+  보고한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - caption은 단지 image--text pair의 부가 문장이 아니라, 어떤
+    시각 속성·관계·상태가 표현에 남는지를 결정하는 supervision이다.
+  - Short/Long을 단순 token-length 비교가 아니라
+    ``description density/granularity'' 비교로 정의할 이론적 근거다.
+- 우리 연구와의 차이와 주의:
+  - DAC는 자연 이미지에 대한 contrastive VL 학습과 compositional
+    reasoning을 다룬다. 웹 GUI나 autoregressive MLLM, grounding,
+    trajectory 전이는 평가하지 않는다.
+  - 따라서 Long description이 GUI agent에도 유리하다는 직접
+    증거가 아니라 가설의 출발점으로 인용해야 한다.
+
+### WebSRC (Chen et al., 2021)
+
+- 논문: https://aclanthology.org/2021.emnlp-main.343/
+- 6.4K webpages에서 HTML, screenshot, metadata와 함께 400K QA
+  pairs를 구축한다. 질문에 답하려면 텍스트 의미뿐 아니라 웹페이지
+  구조도 이해해야 한다고 정의한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 웹 이해를 OCR 또는 텍스트 추출만으로 환원할 수 없고, 구조와
+    시각적 배치를 함께 평가해야 한다는 고전적 근거.
+  - understanding 평가군에 WebSRC를 두는 이유를 설명할 때 적합하다.
+- 주의:
+  - agent 학습이나 caption granularity의 근거로 쓰기보다는
+    webpage understanding benchmark의 계보와 평가 범위를 설명하는
+    인용으로 제한한다.
+
 ### SeeClick (Cheng et al., 2024)
 
 - 논문: https://arxiv.org/abs/2401.10935
@@ -98,13 +136,64 @@
 - 논문: https://arxiv.org/abs/2501.12326
 - enhanced perception, unified action modeling, deliberate reasoning,
   iterative trajectory refinement를 결합한다.
-- GUI screenshot의 context-aware understanding과 precise captioning을
-  perception 학습의 일부로 둔다.
+- perception data는 element description, dense captioning, state
+  transition captioning, QA, set-of-mark의 다섯 과제로 구성된다.
+- element description은 type, appearance, relative position,
+  function을 포함한다. Dense caption은 모든 element description과
+  embedded-image caption을 결합하여 전체 layout, spatial relation,
+  hierarchy, interaction을 포괄하는 상세 설명으로 합성한다.
+- 데이터 구축은 개별 element에서 전체 interface로 올라가는
+  bottom-up 방식이며, 논문은 이를 component precision과 holistic
+  understanding을 함께 확보하기 위한 설계로 설명한다.
+- 학습은 세 phase다. Continual PT에서는 reflection을 제외한
+  perception, grounding, action trace를 모두 함께 사용하고,
+  annealing에서는 각 유형의 고품질 subset을 다시 혼합한다. 이후
+  reflection data로 DPO한다. 전체 규모는 약 50B tokens다.
 - 우리 연구에 가장 가까운 지점:
-  - captioning을 agent 이전의 perception 능력으로 사용한다.
-- 남은 확인사항:
-  - caption target의 평균 길이, 화면당 정보량, short/long ablation
-    여부를 본문/부록에서 추가 확인해야 한다.
+  - GUI-specific dense description이 element 나열을 넘어 관계와
+    기능을 학습시키는 perception supervision이라는 직접적 선례다.
+- 확인 결과 및 공백:
+  - 본문과 부록은 dense caption 예시를 제공하지만 평균 target
+    length, 화면당 언급 element 수, Short/Long 기준을 보고하지 않는다.
+  - perception data만 제거하거나 caption 상세도만 바꾼 ablation은
+    없고, 공개 ablation은 주로 System-1/2 reasoning에 집중한다.
+  - 모든 supervision이 continual PT와 annealing mixture에 얽혀
+    있어 dense caption 자체의 즉시 효과와 agent-stage 지속성을
+    분리할 수 없다.
+
+### MultiUI / Harnessing Webpage UIs (Liu et al., 2024)
+
+- 논문: https://arxiv.org/abs/2410.13824
+- ICLR 2025 발표본: https://openreview.net/pdf?id=IIsTO4P3Ag
+- 1M websites에서 7.3M web-UI instructions를 구축한다. 접근성
+  트리를 text LLM에 입력해 visual understanding/reasoning, OCR,
+  grounding의 세 범주와 아홉 과제를 합성한다.
+- 전체 webpage caption은 desktop 150K, mobile 100K로 총 250K다.
+  Llama-3-70B-Instruct가 accessibility tree를 coherent and detailed
+  description으로 합성하며, 공개 prompt는 모든 visual/textual
+  component를 comprehensively 설명하도록 요구한다.
+- caption 예시는 navigation, heading, subheading, icon, 요소의
+  상대 위치, 전체 layout을 여러 문장으로 기술한다. 다만 논문은
+  평균 token 수나 coverage 통계를 보고하지 않는다.
+- GUI knowledge learning(Stage 1)은 MultiUI의 95%를 사용하고,
+  visual instruction tuning(Stage 2)은 일반 LLaVA data와 나머지
+  5% MultiUI를 혼합한다.
+- task-type ablation에서 Caption samples+LLaVA data는
+  VisualWebBench와 DocVQA를 크게 개선한다. 모든 task type을 함께
+  넣었을 때 네 평가 범주에서 가장 균형 잡힌 결과를 보인다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 구조화된 웹 metadata를 상세한 screenshot description으로
+    변환하면 web understanding뿐 아니라 OCR/document task로도
+    전이될 수 있다는 가장 직접적인 선행 증거.
+  - GUI knowledge stage 뒤에 general instruction stage를 두는
+    two-stage recipe와 stage-wise 평가의 비교 대상.
+- 우리 연구와의 차이:
+  - Caption 유무/과제 유형은 ablate하지만, 동일 screenshot에 대한
+    Short와 Long target을 통제 비교하지 않는다.
+  - Caption-only condition도 일반 LLaVA data를 함께 사용하므로
+    webpage caption granularity의 독립 효과를 보여주지는 않는다.
+  - 최종 Mind2Web 평가는 있으나 PT 직후부터 trajectory SFT
+    이후까지 동일 조건을 종단 추적하지 않는다.
 
 ### MolmoWeb (Gupta et al., 2026)
 
@@ -149,6 +238,39 @@
   - CoT reasoning과 webpage description은 같은 개입이 아니므로,
     직접 증거가 아니라 동기와 해석상의 관련 연구로 제한해야 한다.
 
+### VisualWebBench (Liu et al., 2024)
+
+- 논문: https://arxiv.org/abs/2404.05955
+- 139개 실제 website, 87개 sub-domain에서 수집한 1.5K
+  human-curated instances와 일곱 과제로 OCR, understanding,
+  grounding을 세분해 평가한다.
+- 분석 결과 기존 MLLM은 text-rich environment의 grounding과
+  low-resolution input에서 특히 약하다고 보고한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 하나의 aggregate score만으로는 description이 OCR,
+    understanding, grounding 중 어디에 기여하는지 구분하기
+    어렵다는 평가 설계의 근거.
+  - Long description이 understanding을 높이더라도 grounding까지
+    자동으로 높인다고 가정하지 않고 하위 능력을 분리할 이유다.
+
+### Mind2Web (Deng et al., 2023)
+
+- 논문: https://arxiv.org/abs/2306.06070
+- 137개 real-world website와 31개 domain에서 2K+ open-ended
+  tasks와 crowdsourced action sequences를 수집한다.
+- raw HTML은 너무 길기 때문에 small LM으로 candidate element를
+  먼저 filtering하면 LLM의 효과와 효율이 개선된다고 보고한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 웹 agent 성능에는 화면 이해뿐 아니라 action history,
+    candidate selection, task/domain generalization이 함께
+    작용한다는 점.
+  - 따라서 PT 효과를 최종 agent score만 보고 귀속하지 않고,
+    PT→IT→Trajectory checkpoint를 분리해야 한다는 논리.
+- 주의:
+  - screenshot-only perception이나 description granularity
+    연구가 아니며, downstream web-agent evaluation의 출발점으로
+    인용하는 것이 적절하다.
+
 ## 현재까지의 핵심 공백
 
 검토한 주요 레시피들은 다음 중 하나 이상을 보여준다.
@@ -179,9 +301,32 @@ supervision으로 나누고, 그 차이를 PT→IT→Trajectory 전 과정에서
    representation gain from one that survives agent post-training."  
    후보 인용: Aguvis의 stage ablation; SeeClick의 checkpoint 분석.
 
+5. "Caption density can determine which attributes and relations are
+   retained in vision--language representations."  
+   후보 인용: DAC. 자연 이미지 연구라는 범위를 함께 명시할 것.
+
+6. "Recent web-UI recipes already use comprehensive page descriptions,
+   but do not isolate their granularity from task mixture and later
+   training."  
+   후보 인용: MultiUI; UI-TARS.
+
+## 원고 위치별 인용 후보
+
+| 원고 위치 | 안전하게 지지되는 주장 | 후보 인용 |
+|---|---|---|
+| Introduction | 웹페이지 이해는 텍스트 의미와 구조·배치를 함께 요구한다. | WebSRC; VisualWebBench |
+| Introduction | caption density가 시각 속성과 관계의 학습에 영향을 줄 수 있다. | DAC |
+| Related Work | 최신 GUI 모델은 perception/grounding을 agent 능력의 기반으로 학습한다. | SeeClick; Aguvis; UI-TARS; UGround |
+| Related Work | 상세 webpage description은 실제 최신 recipe에 사용된다. | MultiUI; UI-TARS |
+| Method | downstream data와 순서를 고정해야 초기 supervision의 효과를 분리할 수 있다. | ShowUI; MolmoWeb; UI-TARS |
+| Evaluation | understanding, grounding, agent execution은 분리해 측정해야 한다. | VisualWebBench; SeeClick; Mind2Web |
+| Discussion | 더 풍부한 언어 supervision의 효과는 능력별로 단조롭지 않을 수 있다. | GUI-Libra; MultiUI task ablation |
+
 ## 다음 확인 순서
 
-1. UI-TARS 부록에서 perception/caption 데이터 형식과 길이 확인.
-2. MolmoWebMix의 screenshot QA/caption/grounding 비율 및 ablation 확인.
-3. MultiUI의 web caption task template과 description 길이 확인.
-4. GUI-Libra에서 CoT SFT가 grounding을 저해한 정확한 실험 조건 확인.
+1. MolmoWebMix의 screenshot QA/caption/grounding 비율 및 ablation 확인.
+2. GUI-Libra에서 CoT SFT가 grounding을 저해한 정확한 실험 조건 확인.
+3. Dense-caption 계열(ShareGPT4V, ALLaVA, UltraCaption)이 caption
+   length/coverage를 실제로 통제한 방식과 downstream 결과 확인.
+4. 각 논문의 BibTeX key를 `references.bib`와 대조하고, 원고 문장에
+   넣을 인용만 선별한다.
