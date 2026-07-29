@@ -785,3 +785,16 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
    넣을 인용만 선별한다.
 6. Action 2K의 source와 실제 출력 template을 받은 뒤, AgentTrek 및
    GUI-Libra와 비교 가능한 범위를 확정한다.
+### On the Effects of Data Scale on UI Control Agents (Li et al., 2024)
+
+- NeurIPS 2024 Datasets and Benchmarks 논문. AndroidControl은 833개 Android app의 14,548개 고유 task와 15,283개 demonstration을 포함한다.
+- UI control data 증가는 in-domain 성능을 안정적으로 높이지만 OOD, 특히 high-level instruction의 향상은 더 느리다.
+- 원고 적용: 약 2.6M Long bilingual recipe의 우위는 규모 효과와 언어/mixture 효과를 포함하므로 granularity의 인과 증거가 아니다. matched Short/Long 실험과 최종 recipe 비교를 분리해야 한다.
+
+### Scaling GUI Agents with Visual State Transitions (Liu et al., 2026)
+
+- 2026-07-27 공개된 최신 arXiv preprint(2607.24112)로, peer review 전이라는 점을 명시해야 한다.
+- State Transition Pretraining은 전후 화면에서 action을 예측하는 inverse dynamics와 현재 화면/action에서 다음 상태를 예측하는 forward dynamics를 함께 최적화한다.
+- 동일한 2K AgentNet Win&Mac trajectory 후속 학습 조건에서 AgentNetBench, AndroidControl, GUIOdyssey 향상 및 transition data 규모에 따른 scaling을 보고한다.
+- 우리 연구와의 차이: 이 논문은 실제 visual state pair를 사용하지만 우리는 현재 화면/AX tree에서 합성한 텍스트 expected outcome을 사용한다. 따라서 직접적인 입증이 아니라 mechanism의 동기다.
+- 분석 우선순위: `Long-full` 대 `Long w/o transition/affordance`를 최우선 causal ablation으로 둔다. 그 다음 `Long w/o element details`, embedding distance probe, 한국어 paired diagnostic 순이다.

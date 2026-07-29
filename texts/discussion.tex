@@ -18,4 +18,17 @@ Short PT가 우세하다면, 모든 요소를 빠짐없이 서술하는 목표�
 PT를 사용하므로, Short 경로와의 차이에는 상세도뿐 아니라 언어와
 데이터 규모의 영향이 함께 포함된다. 따라서 이 비교는 실제로
 준비한 recipe의 효용을 보여주며, 상세도의 인과 효과는 언어ㆍ화면ㆍ
-그라운딩 구성을 맞춘 Short/Long 쌍에서 판단한다.
+그라운딩 구성을 맞춘 Short/Long 쌍에서 판단한다. UI control
+학습에서는 데이터 증가에 따른 in-domain 향상과 out-of-domain
+전이가 서로 다른 속도로 나타날 수 있으므로
+\citep{li2024datascale}, 더 큰 Long bilingual recipe의 우위가
+관찰되더라도 이를 설명 상세도의 인과 효과로 보고하지 않는다.
+
+Long description에 포함된 정보 가운데 어떤 요소가 후속 agent
+학습에 기여하는지는 별도의 ablation으로 확인한다. 특히 클릭 이후의
+예상 화면 변화와 affordance를 제거한 조건을 우선 비교한다. 실제
+전후 화면으로 forward/inverse dynamics를 학습한 최근 연구가
+상태전이 supervision의 가능성을 보였기 때문이다
+\citep{liu2026statetransition}. 다만 이는 본 연구의 텍스트 기반
+예상 결과가 효과적이라는 직접 증거가 아니므로, 관찰되는 차이는
+요소 상세도 제거 실험과 stage별 평가를 함께 사용해 해석한다.
