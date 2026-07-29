@@ -600,6 +600,60 @@
 - 주의:
   - desktop benchmark이며 main web claim의 직접 증거는 아니다.
 
+### AutoGUI (Li et al., 2025)
+
+- 논문: https://aclanthology.org/2025.acl-long.510/
+- UI element를 상호작용하기 전과 후의 화면 상태 변화를 LLM이
+  비교하여 element functionality description을 합성한다.
+- LLM-aided rejection과 verification으로 invalid annotation을
+  자동 제거하고 AutoGUI-704K를 구축한다. 사람 평가에서 훈련된
+  human annotator와 유사한 annotation correctness를 보고한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - element의 예상 결과와 affordance는 정적 screenshot에서 임의로
+    상상하기보다 구조화된 근거 또는 state transition에 결부해야 한다.
+  - 합성 annotation의 제약을 prompt에만 맡기지 않고 rejection 및
+    verifier로 강제하는 설계의 직접 선례다.
+- 우리 연구와의 차이:
+  - AutoGUI는 실제 전후 state를 이용하지만, 우리 Stage 1의 예상
+    결과는 accessibility tree와 현재 화면을 바탕으로 teacher가
+    생성한다. 따라서 `expected result`를 관찰된 사실과 구분하고,
+    가능하면 별도의 transition ablation을 두어야 한다.
+
+### GUI-HalluBench (Zhang et al., 2026)
+
+- 논문: https://openaccess.thecvf.com/content/CVPR2026/papers/Zhang_Exposing_and_Evaluating_Hallucinations_for_GUI_Grounding_CVPR_2026_paper.pdf
+- GUI grounding hallucination을 시각적으로 유사한 distractor를
+  고르는 confusion hallucination과, 존재하지 않는 element 및
+  좌표를 만들어내는 fabricated hallucination으로 구분한다.
+- parsing subset과 hallucination subset을 분리한 GUI-HalluBench를
+  만들고, parsing deficiency가 두 hallucination 유형 모두와
+  연결됨을 분석한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 좌표가 형식적으로 0--999 범위에 있다는 것만으로 factual
+    grounding이 보장되지 않는다. 좌표가 실제 Stage 1 element
+    집합에 속하는지도 검증해야 한다.
+  - Short 생성에서 제거한 약 4.7K fabricated coordinates와 최종
+    0건이라는 통계의 의미를 설명하는 직접 근거다.
+- 주의:
+  - 모델 평가용 benchmark 결과이며 합성 caption 품질을 직접
+    평가하는 연구는 아니다.
+
+### OSWorld-G / Jedi (Xie et al., 2025)
+
+- 논문: https://proceedings.neurips.cc/paper_files/paper/2025/hash/22c868099177ee278eb7baccec649f35-Abstract-Datasets_and_Benchmarks_Track.html
+- short referring expression만으로는 software commonsense, layout,
+  fine-grained manipulation을 포괄하기 어렵다고 보고, task를
+  multi-perspective로 분해해 4M Jedi grounding examples를 합성한다.
+- OSWorld-G는 text matching, element recognition, layout
+  understanding, precise manipulation을 나누어 평가한다.
+- Jedi로 grounding을 강화했을 때 OSWorld agent 성능이 23%에서
+  51%로 증가했다고 보고한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 기능ㆍlayoutㆍ조작 정보를 분해하여 합성하는 것이 단일한
+    referring expression 확장보다 진단적이다.
+  - Long description 요소 ablation을 element, layout, affordance,
+    transition 축으로 설계할 근거다.
+
 ## 현재까지의 핵심 공백
 
 검토한 주요 레시피들은 다음 중 하나 이상을 보여준다.
@@ -694,6 +748,14 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
     explicitly."
     후보 인용: ScreenSpot-Pro; UI-E2I-Synth.
 
+13. "Synthetic GUI annotations require rejection or verification because
+    models can fabricate plausible coordinates for nonexistent elements."
+    후보 인용: AutoGUI; GUI-HalluBench.
+
+14. "Functional, layout, and manipulation supervision should be tracked
+    separately rather than collapsed into a single grounding label."
+    후보 인용: OSWorld-G/Jedi; UI-Vision; MultiUI.
+
 ## 원고 위치별 인용 후보
 
 | 원고 위치 | 안전하게 지지되는 주장 | 후보 인용 |
@@ -704,6 +766,7 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 | Related Work | 상세 webpage description은 실제 최신 recipe에 사용된다. | MultiUI; UI-TARS |
 | Method | downstream data와 순서를 고정해야 초기 supervision의 효과를 분리할 수 있다. | ShowUI; MolmoWeb; UI-TARS |
 | Method | trajectory 조건에서는 action vocabulary와 sample/filtering을 조건 간 고정해야 한다. | AgentTrek; MolmoWeb |
+| Method | teacher가 생성한 좌표와 기능 설명은 구조화 근거 및 verifier로 제한해야 한다. | AutoGUI; GUI-HalluBench; MultiUI |
 | Evaluation | understanding, grounding, agent execution은 분리해 측정해야 한다. | VisualWebBench; SeeClick; Mind2Web |
 | Evaluation | 한국어 subset은 영어 원본과 paired하게 평가하고 별도 diagnostic으로 보고한다. | MPR-GUI; X-WebAgentBench; K-BrowseComp |
 | Evaluation | grounding 결과는 target size와 instruction type별로 분해해야 한다. | ScreenSpot-Pro; UI-E2I-Synth |
