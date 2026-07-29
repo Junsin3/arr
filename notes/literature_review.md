@@ -693,6 +693,29 @@ supervision으로 나누고, 그 차이를 PT→IT→Action→Trajectory 전 과
    retrieval 또는 matched--mismatched margin으로 측정할 수 있다.
    단순 평균 cosine distance는 표현의 유용성이나 원인을 직접
    증명하지 못하므로 단독 분석으로 두지 않는다.
+   - DAC \citep{doveh2023dac}도 CLIP matching-score 분포는
+     caption--image alignment의 진단으로 사용하고, 학습 효과의
+     결론은 ARO/VL-Checklist 성능과 quality/density ablation에서
+     얻는다. 즉 similarity 자체가 downstream mechanism의 증거는
+     아니다.
+   - 우리 모델은 CLIP 같은 dual encoder가 아니라 autoregressive
+     MLLM이므로 Short와 Long 응답의 평균 hidden-state cosine은
+     sequence length, pooling, layer 선택에 민감하다. checkpoint 간
+     절대값을 직접 비교하지 않는다.
+   - 권장 probe: 동일 화면 $i$의 representation과 (a) 정답
+     description, (b) 같은 domain의 다른 화면 description,
+     (c) 텍스트는 비슷하지만 target 위치/상태가 다른 hard negative를
+     비교한다. 각 layer에서
+     `margin = sim(screen_i, text_i) - sim(screen_i, text_negative)`와
+     Recall@K를 보고한다.
+   - Short/Long 양쪽에 같은 pooling, token 위치, 정규화, candidate
+     pool을 적용하고 screen ID 단위 paired bootstrap CI를 계산한다.
+     random negative만 쓰면 OCR 단어 중복만 측정할 수 있으므로
+     기능ㆍ상태ㆍ공간관계별 hard negative를 별도로 만든다.
+   - 해석 규칙: Long의 margin 상승이 해당 category benchmark
+     향상과 함께 나타날 때만 “더 구별적인 표현과 일관된다”고 쓴다.
+     margin만 상승하면 representation 변화, benchmark만 상승하면
+     probe가 mechanism을 포착하지 못한 것으로 보고한다.
 3. **한국어 subset 평가는 별도의 multilingual generalization
    결과로 둔다.** 한국어 학습 모델을 보고하려면 필요하지만,
    비공식 번역 subset은 표준 benchmark가 아니므로 번역 절차,
@@ -808,7 +831,10 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 - State Transition Pretraining은 전후 화면에서 action을 예측하는 inverse dynamics와 현재 화면/action에서 다음 상태를 예측하는 forward dynamics를 함께 최적화한다.
 - 동일한 2K AgentNet Win&Mac trajectory 후속 학습 조건에서 AgentNetBench, AndroidControl, GUIOdyssey 향상 및 transition data 규모에 따른 scaling을 보고한다.
 - 우리 연구와의 차이: 이 논문은 실제 visual state pair를 사용하지만 우리는 현재 화면/AX tree에서 합성한 텍스트 expected outcome을 사용한다. 따라서 직접적인 입증이 아니라 mechanism의 동기다.
-- 분석 우선순위: `Long-full` 대 `Long w/o transition/affordance`를 최우선 causal ablation으로 둔다. 그 다음 `Long w/o element details`, embedding distance probe, 한국어 paired diagnostic 순이다.
+- 분석 우선순위: `Long-full` 대 `Long w/o transition/outcome`을
+  최우선 causal ablation으로 두고, `Long w/o function/affordance`,
+  `Long w/o element details`, category-aware embedding probe,
+  한국어 paired diagnostic 순으로 진행한다.
 ### GUICourse (Chen et al., 2025)
 
 - ACL 2025 long paper. GUIEnv-global은 C4에서 렌더링한 웹 화면 10M개이며, 각 target은 화면의 모든 기술 가능한 텍스트, grounding 정보, layout sequence를 포함하는 long text다.
