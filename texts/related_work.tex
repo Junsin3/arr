@@ -111,6 +111,11 @@ sample이 섞여 있어, 두 능력의 완전한 인과 분해로 볼 수는 없
 중ㆍ영 benchmark를 모두 평가한다 \citep{zhang2025agentcpm}.
 그러나 언어별 단독 학습 대조군이 없어 bilingual mixture 자체의
 효과는 분리되지 않는다.
+UI-Hawk는 grounding, referring, screen QA, summarization을 먼저
+학습하고 이전 screenshot을 시각 history로 제공한 뒤 navigation을
+학습한다 \citep{zhang2025uihawk}. 동일한 후속 stage에서 시각
+history가 행동 텍스트만 사용한 조건보다 navigation에 유리하다는
+결과는 정적 화면 이해와 screen-stream 이해가 구별됨을 보여준다.
 
 후속 언어 supervision이 좌표 예측에 항상 이로운 것도 아니다.
 GUI-Libra는 긴 CoT SFT에서 response length와 grounding accuracy의

@@ -904,3 +904,27 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 - matched 20% budget에서 LLaVA-665K full tuning의 100.3%, Vision-Flan-186K의 101.6% 상대 성능을 보고한다.
 - 아직 peer-reviewed 여부가 확인되지 않았으므로 본문 핵심 근거보다 IT audit 아이디어로 둔다.
 - 우리 데이터 audit 후보: 이미지 원본과 blank/셔플 이미지를 넣었을 때 answer NLL 차이를 visual-dependency score로 계산한다. 점수가 낮은 QA 비율을 source별로 보고하면 70K/30K mixture의 실질적 시각 신호를 설명할 수 있다.
+### UI-Hawk (Zhang et al., 2025)
+
+- EMNLP 2025 main paper. current screen과 text action history만 쓰는 대신 이전 screenshot sequence를 처리하는 history-aware visual encoder를 사용한다.
+- Stage 1은 UI grounding, referring, screen QA, screen summarization의 영/중 task를 curriculum으로 학습하고, Stage 2는 sequential navigation을 학습한다.
+- 모든 ablation이 동일한 Stage 2를 거친 상태에서, text history보다 visual history가 GUI-Odyssey+와 GUI-Zouwu navigation에 우세하다. 네 기본 task를 함께 넣은 full data가 grounding과 navigation 모두 가장 높다.
+- Table 5 예: text history baseline은 GUI-Odyssey+ Overall/ClickAcc 71.7/66.9, visual history는 75.7/71.9, full data+visual history는 79.4/76.3이다. GUI-Zouwu에서도 각각 41.2/49.3, 44.8/56.5, 47.9/61.4다.
+- 우리 원고 적용:
+  - 정적 Long description의 효과와 실제 screen stream/history의 효과를 같은 것으로 부르지 않는다.
+  - Trajectory 100K에서 각 sample의 history screenshot 수, text-only history 여부, context truncation 비율을 보고한다.
+  - Long의 이점이 Trajectory 후 커지더라도 history modality가 조건 간 동일함을 확인한 뒤 interaction으로 해석한다.
+
+### Video2GUI / WildGUI (Xiong et al., 2026)
+
+- 2026-05 arXiv preprint(2605.14747). 500M video metadata에서 GUI tutorial을 coarse-to-fine filtering하고 1,500개 이상 app/site의 12M interaction trajectories를 자동 추출한다.
+- WildGUI PT가 Qwen2.5-VL과 Mimo-VL의 GUI grounding/action benchmark를 5--20% 개선한다고 보고한다.
+- 우리 원고 적용 후보: Trajectory 품질은 개수뿐 아니라 app/domain coverage, action distribution, 성공/실패 filter, 중복 trajectory 비율로 기술해야 한다.
+- 아직 peer-reviewed publication이 확인되지 않았고, 영상에서 복원한 trajectory와 우리 데이터 source가 다르므로 직접 성능 비교에는 쓰지 않는다.
+
+### UI-Oceanus (2026 ARR submission)
+
+- ACL ARR 2026 May 공개 submission. executed transition에서 forward, inverse, backward dynamics objective를 비교하며 forward state prediction이 가장 강한 scaling driver라고 보고한다.
+- CPT의 offline 평균 성공률 +7%, real-world online navigation +16.8%를 주장하며 데이터 규모에 따른 증가도 제시한다.
+- 매우 직접적인 동시기 연구지만 아직 심사 중인 submission이다. main claim의 핵심 근거로는 peer-reviewed AutoGUI/UI-Hawk와 별도 표시하고, 최신 관련연구/분석 후보로만 관리한다.
+- 우리와의 차이: 실제 executed next state를 생성 목표로 쓰는 반면, Long description은 현재 화면에서 teacher가 예상한 textual outcome이다.
