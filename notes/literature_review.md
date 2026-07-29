@@ -426,6 +426,70 @@
     연구가 아니며, downstream web-agent evaluation의 출발점으로
     인용하는 것이 적절하다.
 
+### AgentTrek (Xu et al., 2025)
+
+- 논문: https://arxiv.org/abs/2412.09605
+- ICLR 2025 Spotlight.
+- 인터넷의 tutorial 문서를 수집ㆍ분류한 뒤 고수준 목표와 단계별
+  지침으로 바꾸고, VLM agent가 실제 웹에서 이를 replay하도록 하여
+  trajectory를 합성한다. 별도 VLM evaluator가 task instruction
+  준수와 핵심 단계 성공 여부를 trajectory와 step 수준에서 검증한다.
+- 최종 데이터는 10,398 trajectories, 평균 12.1 steps, 127개
+  websites 규모다. 관측은 screenshot, HTML, accessibility tree를
+  포함하며 reasoning과 action도 함께 기록한다.
+- 순수 시각 agent에서는 Playwright action을 표준 pyautogui-style
+  action으로 변환하여 website 구현과 분리된 행동 공간을 사용한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - trajectory는 단순 action label 집합이 아니라 목표, 시간 순서의
+    화면 관측, reasoning, grounded action이 결합된 supervision이다.
+  - 동일한 trajectory sample과 action normalization을 모든 PT
+    조건에 사용해야 description 효과를 분리할 수 있다.
+  - 실제 환경에서 replay한 합성 trajectory도 evaluator filtering이
+    필요하므로 trajectory 수만으로 품질을 대표할 수 없다.
+- 차이와 주의:
+  - trajectory 합성법의 효과를 다루며 PT description granularity는
+    조작하지 않는다.
+  - 우리 Action 2K 단계의 직접 선례는 아니다. 이 단계는 일곱 개
+    action의 출력 계약을 맞추는 실험 구현으로 설명해야 한다.
+
+### ScaleTrack (Huang et al., 2025)
+
+- 논문: https://arxiv.org/abs/2505.00416
+- GUI agent 학습을 grounding과 planning으로 나누고, element
+  referring, context awareness, functional description으로 만든
+  grounding sample을 하나의 template으로 통합한다.
+- 일반적인 next-action prediction에 더해 현재 화면에 도달한 과거
+  action을 역으로 예측하는 back-tracking objective를 추가한다.
+  논문은 이를 GUI 상태 변화의 규칙을 학습하기 위한 supervision으로
+  해석한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 화면 설명의 affordance 및 transition 정보가 trajectory에서
+    필요한 상태 변화 표현과 연결될 수 있다는 mechanism 가설.
+  - `Long w/o transition/affordance` ablation이 planning transfer를
+    진단하는 조작이라는 근거.
+- 주의:
+  - Short/Long caption을 비교하지 않으며, 공개된 결과만으로
+    transition description 하나의 기여를 분리할 수는 없다.
+
+### OpAgent (Guo et al., 2026)
+
+- 논문: https://arxiv.org/abs/2602.13559
+- 초기 SFT를 Planning, Acting, Grounding이라는 기능별 primitive로
+  분류한 hierarchical multi-task mixture로 구성한 뒤 실제 웹에서
+  online agentic RL을 수행한다.
+- offline trajectory는 실제 웹의 stochastic transition과 feedback을
+  충분히 반영하지 못해 distribution shift가 생길 수 있다고
+  문제를 제기한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - IT, Action, Trajectory를 구분해 기록하는 것은 최종 성능을
+    하나의 post-training으로 묶는 것보다 각 기능의 간섭과 전달을
+    해석하기 쉽다.
+  - static Multimodal-Mind2Web 결과는 offline planning transfer를
+    보여주지만 실제 웹 성공률 전체를 대변하지 않는다는 한계 서술.
+- 주의:
+  - online RL과 modular inference가 핵심이며, 본 연구는 동일한
+    online interaction evaluation을 수행하지 않는다.
+
 ## 현재까지의 핵심 공백
 
 검토한 주요 레시피들은 다음 중 하나 이상을 보여준다.
@@ -496,6 +560,15 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
    than length alone, and can trade off against short-text capabilities."
    후보 인용: Long Story Short; LoTLIP; ShareGPT4V.
 
+8. "Agent trajectories couple sequential observations with grounded
+   actions, so their source, filtering, and action normalization are part
+   of the training recipe rather than incidental preprocessing."
+   후보 인용: AgentTrek; MolmoWeb; UI-TARS.
+
+9. "Grounding, acting, and planning are related but distinguishable
+   post-training functions."
+   후보 인용: Aguvis; ScaleTrack; OpAgent; GUI-Libra.
+
 ## 원고 위치별 인용 후보
 
 | 원고 위치 | 안전하게 지지되는 주장 | 후보 인용 |
@@ -505,6 +578,7 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 | Related Work | 최신 GUI 모델은 perception/grounding을 agent 능력의 기반으로 학습한다. | SeeClick; Aguvis; UI-TARS; UGround |
 | Related Work | 상세 webpage description은 실제 최신 recipe에 사용된다. | MultiUI; UI-TARS |
 | Method | downstream data와 순서를 고정해야 초기 supervision의 효과를 분리할 수 있다. | ShowUI; MolmoWeb; UI-TARS |
+| Method | trajectory 조건에서는 action vocabulary와 sample/filtering을 조건 간 고정해야 한다. | AgentTrek; MolmoWeb |
 | Evaluation | understanding, grounding, agent execution은 분리해 측정해야 한다. | VisualWebBench; SeeClick; Mind2Web |
 | Discussion | 더 풍부한 언어 supervision의 효과는 능력별로 단조롭지 않을 수 있다. | GUI-Libra; GUI-G1; LoTLIP; MultiUI task ablation |
 | Discussion | Long의 효과는 길이뿐 아니라 grounding, teacher 품질, 데이터 다양성에 의존한다. | Long Story Short; ShareGPT4V; KnowAda |
@@ -519,3 +593,5 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
    Discussion에 최소한으로 연결.
 5. 각 논문의 BibTeX key를 `references.bib`와 대조하고, 원고 문장에
    넣을 인용만 선별한다.
+6. Action 2K의 source와 실제 출력 template을 받은 뒤, AgentTrek 및
+   GUI-Libra와 비교 가능한 범위를 확정한다.
