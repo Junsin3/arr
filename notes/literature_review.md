@@ -928,3 +928,23 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 - CPT의 offline 평균 성공률 +7%, real-world online navigation +16.8%를 주장하며 데이터 규모에 따른 증가도 제시한다.
 - 매우 직접적인 동시기 연구지만 아직 심사 중인 submission이다. main claim의 핵심 근거로는 peer-reviewed AutoGUI/UI-Hawk와 별도 표시하고, 최신 관련연구/분석 후보로만 관리한다.
 - 우리와의 차이: 실제 executed next state를 생성 목표로 쓰는 반면, Long description은 현재 화면에서 teacher가 예상한 textual outcome이다.
+### MMStar / Are We on the Right Way for Evaluating LVLMs? (Chen et al., 2024)
+
+- NeurIPS 2024. 기존 multimodal benchmark에는 이미지 없이 질문/선택지만으로 풀리는 문항과 의도하지 않은 학습 누수가 섞여 실제 시각 능력을 과대평가할 수 있음을 지적한다.
+- 1,500개 vision-indispensable samples를 엄격히 선별하고 Multi-modal Gain과 Multi-modal Leakage 지표를 제안한다.
+- 대표 관찰: GeminiPro가 이미지 없이 MMMU 42.7%를 기록하고, 조사한 6개 benchmark에서 text-only 조건이 random baseline을 평균 약 24%p 상회한다.
+- 우리 원고 적용:
+  - VisualWebBench/WebSRC/한국어 subset에 동일 prompt의 image-free baseline을 실행한다.
+  - `full-image score - image-free score`를 visual gain으로 보고해 Long이 언어 prior만 강화했는지 구분한다.
+  - 한국어 번역 subset에서는 원문과 번역문 모두 image-free score를 보고한다. 번역이 답 단서를 추가했는지 확인할 수 있다.
+
+### 웹 GUI decontamination 체크리스트
+
+- source-name 제거는 known direct source leakage만 줄인다. 재포장된 LLaVA sample, 번역/paraphrase, 같은 screenshot의 다른 QA, 동일 URL의 다른 capture는 남을 수 있다.
+- 네 수준을 분리해 보고한다:
+  1. ID/source: dataset name, original sample ID exact overlap.
+  2. Text: Unicode/공백/좌표를 정규화한 exact match와 n-gram/semantic near match.
+  3. Image: exact file hash, perceptual hash, crop/resize에 견디는 image embedding nearest neighbor.
+  4. Web provenance: canonical URL, registered domain, template/layout cluster.
+- benchmark별로 발견된 overlap 수와 제거 후 최종 평가 수를 표로 남긴다. threshold는 결과를 보기 전에 고정하고, borderline pair를 수동 검수한다.
+- 한국어 subset은 영어 benchmark의 번역이므로 bilingual PT와 semantic overlap이 생길 수 있다. 영어 원본과 paired comparison에는 유용하지만 독립적인 contamination-free benchmark라고 부르지 않는다.

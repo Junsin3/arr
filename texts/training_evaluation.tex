@@ -12,8 +12,10 @@ cosine learning rate $10^{-5}$, warmup 3\%, completion-only loss,
 
 IT는 총 100K 예제로, MolmoWeb SyntheticQA 70K와 필터링한
 LLaVA-NeXT 30K를 같은 순서로 학습한다. 후속 일반화 평가와의
-중복을 막기 위해 LLaVA-NeXT에서 DocVQA, ChartQA, DVQA, AI2D
-출처를 제거한다. IT 또는 PT checkpoint에는 동일한 2K Action
+직접적인 출처 중복을 줄이기 위해 LLaVA-NeXT에서 DocVQA, ChartQA,
+DVQA, AI2D 출처를 제거한다. 이 필터가 재표현된 문항이나 동일
+이미지의 중복까지 배제함을 뜻하지는 않는다. IT 또는 PT
+checkpoint에는 동일한 2K Action
 예제로 출력 계약과 기본 행동을 먼저 적응시킨 뒤, 동일한 약 100K
 trajectory 예제를 학습한다. 순차 관측과 grounded action을 함께
 포함하는 trajectory의 구성 및 filtering이 agent 학습에 영향을
@@ -81,6 +83,11 @@ cross-task, cross-website, cross-domain 분할을 각각 보고한다.
 결과가 달라질 수 있으므로 \citep{jandial2026grounders}, 가능한
 평가 subset에서는 동일 target의 표현 변형을 묶어 평균 정확도와
 변형 간 일관성을 함께 보고한다.
+또한 시각 정보 없이도 풀리는 문항은 멀티모달 능력을 과대평가할 수
+있으므로 \citep{chen2024mmstar}, 각 QA benchmark에 동일 prompt의
+image-free baseline을 함께 실행한다. 학습 데이터와 평가 데이터
+사이에는 sample ID와 정규화 문장 exact match뿐 아니라 screenshot
+perceptual hash 및 URL/domain 중복률도 보고한다.
 
 \subsection{주요 결과 (진행 중)}
 
