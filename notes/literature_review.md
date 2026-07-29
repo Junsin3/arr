@@ -1146,3 +1146,46 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
   - 자연 이미지 caption pipeline이며 Short/Long PT의 matched
     downstream 비교는 아니다. 우리 가설의 직접 증거가 아니라
     데이터 품질 측정법과 validation 설계의 근거로 사용한다.
+
+### Mitigating Visual Knowledge Forgetting in MLLM Instruction-tuning (Wu et al., 2025)
+
+- 최종 논문: Findings of EMNLP 2025,
+  https://aclanthology.org/2025.findings-emnlp.123/
+- 멀티모달 PT 뒤 task-specific IT를 수행하면 textual objective에
+  맞추는 과정에서 기존 visual representation이 압축될 수 있다고
+  분석한다. visual-token hidden state의 singular-value 분포로
+  effective rank를 계산하여 representation richness의 변화를
+  측정한다.
+- LLaVA-1.5를 Flickr30K captioning에 표준 fine-tuning했을 때,
+  target Flickr30K는 3.5에서 78.82로 증가하지만 기존 여섯 시각
+  과제 평균은 55.82에서 47.97로 감소한다. LoRA 조건은 target
+  64.18, 기존 과제 평균 24.33으로 더 큰 손실을 보였다. 따라서
+  parameter-efficient tuning 자체가 retention을 보장하지 않는다.
+- OKVQA처럼 기존 VQA와 가까운 target에서도 표준 fine-tuning 뒤
+  기존 과제별 하락이 나타난다. 즉 후속 과제가 유사해 보인다는
+  이유만으로 PT 능력이 보존된다고 가정할 수 없다.
+- 논문은 pretrained model의 visual representation과 현재 model을
+  맞추고 gradient 방향을 조절하는 MDGD를 제안한다. Flickr30K
+  조건에서 기존 과제 평균 66.61과 target 73.47을 동시에 기록해,
+  표준 fine-tuning보다 retention--adaptation 균형을 개선한다.
+- 우리 연구에 쓸 수 있는 근거:
+  - Short/Long 차이가 IT 뒤 줄어들었을 때 이를 ``PT 효과가
+    없었다''고 해석하지 않는다. 각 조건에서 PT 직후 대비
+    `Delta_IT`를 계산해 어느 모델이 개선되거나 잊었는지 분해한다.
+  - IT 100K의 LLaVA-NeXT 30K와 MolmoWeb QA 70K가 실제로 image를
+    포함하는 비율, visual target의 종류, 평균 loss token을
+    보고해야 한다. 같은 sample 수라도 직접 visual supervision의
+    밀도가 다를 수 있다.
+  - representation 분석을 한다면 임의의 embedding distance 하나만
+    쓰기보다 동일한 고정 screenshot subset에서 visual-token
+    effective rank, pretrained-checkpoint와의 centered cosine/CKA,
+    그리고 behavioral score를 checkpoint별로 함께 보고한다.
+  - Long이 더 높은 effective rank를 유지하면서 이해 성능도
+    보존하는지는 mechanism을 지지하는 보조 증거가 될 수 있다.
+    반대로 rank 차이만으로 Long의 agent 향상 원인을 확정하지 않는다.
+- 주의:
+  - 자연 이미지 VQA/captioning을 대상으로 하고 GUI 좌표
+    grounding이나 trajectory를 다루지 않는다.
+  - MDGD를 사용하지 않은 우리 recipe의 결과를 이 논문의 방법
+    효과처럼 서술하면 안 된다. 논문은 stage-wise forgetting과
+    representation diagnostic의 근거로만 사용한다.
