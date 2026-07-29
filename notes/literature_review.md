@@ -550,6 +550,56 @@
   - visual GUI understanding/grounding이 아니라 정보 검색형 browsing
     benchmark이므로 직접 평가 대체재가 아니다.
 
+### ScreenSpot-Pro (Li et al., 2025)
+
+- 논문: https://arxiv.org/abs/2504.07981
+- 23개 전문 application, 5개 산업군, 3개 OS에서 수집한 1,581개
+  고해상도 full-screen grounding instruction으로 구성된다.
+- ScreenSpot-v2에서도 target box의 상대 크기가 작아질수록 여러
+  모델의 정확도가 일관되게 하락한다. ScreenSpot-Pro의 planner-free
+  최고 baseline은 18.9%에 그친다.
+- 검색 영역을 좁히는 ScreenSeekeR는 추가 학습 없이 OS-Atlas-7B를
+  18.9%에서 48.1%로 높인다. crop ablation에서는 OS-Atlas와
+  UGround의 최적 crop size가 달라, 입력 해상도를 높이는 것이 항상
+  유리하지 않음을 보인다.
+- 우리 논문에 쓸 수 있는 근거:
+  - grounding 결과는 PT뿐 아니라 pixel budget, target-to-screen
+    ratio, crop/search strategy에 민감하다.
+  - Short/Long 비교에서 동일 resize와 좌표 복원을 적용하고,
+    가능하면 target-size bin별 성능을 함께 보고해야 한다.
+- 주의:
+  - 전문 desktop application 중심이며 search method의 이득을
+    representation 개선으로 해석하면 안 된다.
+
+### UI-E2I-Synth / UI-I2E-Bench (Liu et al., 2025)
+
+- 논문: https://aclanthology.org/2025.findings-acl.809/
+- 기존 grounding 평가의 공백으로 비현실적인 element-to-screen
+  ratio, element type 불균형, explicit instruction 편중을 지적한다.
+- GPT-4o로 explicit/implicit instruction을 포함하는 대규모 grounding
+  data를 합성하고, 이 특성을 구분하는 UI-I2E-Bench를 제안한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - Long description의 기능ㆍaffordance 보존 가설은 단순 label
+    matching보다 implicit instruction에서 더 직접적으로 검증된다.
+  - aggregate accuracy만 보고하면 target size와 instruction
+    specificity에 따른 차이를 놓칠 수 있다.
+- 분석 권고:
+  - 가능하면 explicit/implicit 결과를 분리한다. 실행이 어렵다면
+    기존 평가를 target box area와 text/icon으로 stratify한다.
+
+### UI-Vision (Nayak et al., 2025)
+
+- 논문: https://proceedings.mlr.press/v267/nayak25a.html
+- 83개 desktop application의 사람 demonstration에 bounding box,
+  UI label, click/drag/keyboard trajectory를 함께 제공한다.
+- element grounding, layout grounding, action prediction의
+  fine-to-coarse 세 단계로 평가한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - description PT의 효과를 single-element localization, 전체
+    layout 이해, next-action prediction으로 분리하는 선례다.
+- 주의:
+  - desktop benchmark이며 main web claim의 직접 증거는 아니다.
+
 ## 현재까지의 핵심 공백
 
 검토한 주요 레시피들은 다음 중 하나 이상을 보여준다.
@@ -639,6 +689,11 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
     K-BrowseComp는 native Korean benchmark지만 visual GUI 과제가
     아니다. 방법론적 선택이므로 번역ㆍ검수 절차도 함께 명시할 것.
 
+12. "GUI grounding accuracy is strongly conditioned on target size,
+    screenshot resolution, and whether the instruction names the target
+    explicitly."
+    후보 인용: ScreenSpot-Pro; UI-E2I-Synth.
+
 ## 원고 위치별 인용 후보
 
 | 원고 위치 | 안전하게 지지되는 주장 | 후보 인용 |
@@ -651,6 +706,7 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 | Method | trajectory 조건에서는 action vocabulary와 sample/filtering을 조건 간 고정해야 한다. | AgentTrek; MolmoWeb |
 | Evaluation | understanding, grounding, agent execution은 분리해 측정해야 한다. | VisualWebBench; SeeClick; Mind2Web |
 | Evaluation | 한국어 subset은 영어 원본과 paired하게 평가하고 별도 diagnostic으로 보고한다. | MPR-GUI; X-WebAgentBench; K-BrowseComp |
+| Evaluation | grounding 결과는 target size와 instruction type별로 분해해야 한다. | ScreenSpot-Pro; UI-E2I-Synth |
 | Discussion | 더 풍부한 언어 supervision의 효과는 능력별로 단조롭지 않을 수 있다. | GUI-Libra; GUI-G1; LoTLIP; MultiUI task ablation |
 | Discussion | Long의 효과는 길이뿐 아니라 grounding, teacher 품질, 데이터 다양성에 의존한다. | Long Story Short; ShareGPT4V; KnowAda |
 
