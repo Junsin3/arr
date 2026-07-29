@@ -844,12 +844,6 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 - 중요한 한계: long target 자체의 효과와 데이터 규모가 분리되지 않았고 Short target 대조군도 없다. “상세한 GUI PT가 쓰인다”는 선행 근거이지 “Long이 Short보다 낫다”는 증거는 아니다.
 - 원고 적용: 우리 matched Short/Long 설계의 필요성과 stage별 OCR/grounding/agent 평가를 뒷받침한다.
 
-### Do GUI Grounders Truly Understand UI Elements? (Jandial et al., 2026)
-
-- Findings of EACL 2026. 동일 UI element를 시각 속성, 공간 관계 등 여러 유효한 instruction으로 지칭하는 GUI Grounding Sensitivity Benchmark를 제안한다.
-- 12개 모델이 같은 target의 표현 변화에 상당히 민감하며, 기존 단일 instruction 정확도가 실제 grounding 능력을 충분히 나타내지 못한다고 보고한다.
-- 생성 instruction은 frontier model도 hallucination하므로 별도 validation이 필요하다고 지적한다.
-- 원고 적용: 한국어 paired diagnostic과 description granularity 평가에서 단일 문구 정확도만 보고하지 말고, 가능하면 동일 target paraphrase별 평균과 consistency를 함께 보고한다.
 ### InfiGUIAgent (Liu et al., 2026)
 
 - EACL 2026 long paper. 2-stage SFT로 Stage 1은 GUI understanding, grounding, QA와 일반 능력을, Stage 2는 trajectory 기반 hierarchical reasoning 및 expectation--reflection을 학습한다.
@@ -1001,3 +995,89 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
   - grounding 상승/agent 불변이면 planning·recovery 병목, grounding 불변/agent 상승이면 affordance·transition supervision 가능성을 우선 검토한다.
   - 가능하면 action 2K 직후에는 single-step interaction, trajectory 100K 직후에는 exact-state/task success를 따로 측정한다.
 - 이전 arXiv:2508.09241 버전은 2,257개로 보고했지만, 최종 ACL 2026판은 2,209개다. 원고에는 최종판 수치만 사용한다.
+
+### Do GUI Grounders Truly Understand UI Elements? (Jandial et al., 2026)
+
+- 최종 논문: Findings of EACL 2026,
+  https://aclanthology.org/2026.findings-eacl.144/
+- 기존 grounding benchmark가 UI 요소마다 하나의 대표적인
+  referring expression만 평가한다는 한계를 지적한다. 같은 요소도
+  시각 속성, 상대 위치, 주변 맥락으로 다르게 지칭될 수 있으므로,
+  표현이 달라져도 같은 위치를 예측하는지를 별도로 측정한다.
+- 100개 desktop screenshot의 target element에 대해 사람 검증을
+  거친 1,712개 instruction, 즉 요소당 약 17개 표현을 구축하고
+  12개 모델을 평가한다. 최신 benchmark의 단일 점수 순위와 표현
+  변화에 대한 sensitivity 순위가 일치하지 않을 수 있음을 보인다.
+- 합성 과정에서는 가시성, 시각 속성의 정확성, 공간 관계,
+  target의 유일성을 단계별로 검증한다. 특히 상대 위치만으로
+  target이 유일하게 정해지지 않는 표현에는 시각 세부정보를
+  추가한다. frontier VLM도 instruction 생성 중 hallucination을
+  보였기 때문에 최종 benchmark는 수동 검수를 거친다.
+- 우리 연구에 쓸 수 있는 근거:
+  - description의 효과는 길이뿐 아니라 어떤 식별 단서
+    (visible text, visual attribute, relative relation, context)를
+    보존하는지에 달려 있다.
+  - Short/Long의 grounding 평가는 하나의 표현만 쓰지 말고 동일
+    target에 대한 explicit, visual, relational paraphrase별 성능과
+    일관성을 함께 보고하는 것이 바람직하다.
+  - Long에서 element detail을 제거하는 ablation은 단순 token
+    축소가 아니라 target의 유일성을 만드는 단서의 제거로
+    해석할 수 있다.
+- 주의:
+  - 이 논문은 학습용 whole-page description의 granularity를
+    비교하지 않는다. 따라서 Long PT의 이득에 대한 직접 근거가
+    아니라 평가 설계와 오류 해석의 근거로만 사용한다.
+
+### Empowering GUI Agents via Autonomous Experience Exploration and Hindsight Experience Utilization for Task Planning (Men et al., 2026)
+
+- 최종 논문: ACL 2026 long paper,
+  https://aclanthology.org/2026.acl-long.1670/
+- 수집된 trajectory에서 실제 수행 결과에 맞게 task를 역으로
+  구성하는 hindsight alignment를 사용해, task--trajectory
+  불일치를 줄인 고수준 학습 데이터를 만든다.
+- 동일한 데이터 규모와 학습 설정에서 비교하며, task granularity를
+  low/middle/high로 나눈 TDHAF 분석을 제안한다. 원자 수준 능력의
+  숙련이 같은 도메인의 고수준 계획 숙련을 보장하지 않았고,
+  고수준 task 학습은 낮은 수준으로의 전이와 OOD 다단계
+  일반화에서 더 강했다고 보고한다.
+- Qwen2.5-VL-7B 기반 PEEU는 보지 않은 실제 웹사이트에서 30.6%를
+  기록했으며, 논문이 보고한 instruct model 기준선은 7.8%다.
+- 우리 연구에 쓸 수 있는 근거:
+  - 2K action adaptation과 100K trajectory 학습은 서로 대체 가능한
+    양적 단계가 아니라, 각각 원자 실행과 고수준 계획을 학습하는
+    질적으로 다른 단계일 수 있다.
+  - PT의 grounding 향상이 최종 trajectory 성공으로 자동 전이된다고
+    가정하지 말고, Action 직후의 single-step 지표와 Trajectory
+    직후의 high-level task success를 분리해야 한다.
+  - task와 trajectory의 의미 정합성도 PT 조건과 독립적인
+    교란변수이므로 동일 ID뿐 아니라 goal--outcome consistency를
+    점검해야 한다.
+- 주의:
+  - 여기서 granularity는 설명의 상세도가 아니라 task hierarchy다.
+    우리 Short/Long 개입의 직접 비교 논문으로 제시하면 안 된다.
+
+### Experience-driven Multi-turn Reinforcement Learning for GUI Agents (Lu et al., 2026)
+
+- 최종 논문: ACL 2026 long paper,
+  https://aclanthology.org/2026.acl-long.428/
+- single-turn RL이 학습 때 expert history에 조건화되지만 배포
+  시점에는 모델이 만든 history를 보게 되는 분포 불일치를
+  지적한다. EMPO는 expert trajectory를 상태 전이 경험으로
+  사용하면서 rollout history 자체는 모델 행동으로 구성하고,
+  expert와 어긋난 step은 patch module로 복구한다.
+- 미래 보상을 할인해 반영하고 step/trajectory 두 수준의 advantage를
+  사용한다. 1K public trajectory를 RL 경험으로 사용해 base 대비
+  AndroidWorld +12.0%p, AITW +23.8%p를 보고한다.
+- 우리 연구에 쓸 수 있는 근거:
+  - offline trajectory SFT 점수는 실제 배포에서 누적되는
+    self-generated-history 오류를 충분히 나타내지 못할 수 있다.
+  - PT 효과의 지속성을 주장하려면 offline next-action accuracy와
+    online multi-step success를 구분하고, 오류가 난 첫 step의
+    위치와 이후 recovery 여부를 함께 보는 것이 유용하다.
+  - trajectory 단계 후 성능 변화는 화면 표현 능력뿐 아니라
+    history distribution과 credit assignment의 영향을 받으므로,
+    PT의 인과 효과로 과도하게 해석하지 않는다.
+- 주의:
+  - EMPO는 RL 연구이며 본 연구의 100K trajectory SFT와 학습
+    objective가 다르다. 직접 baseline보다 trajectory evaluation의
+    한계를 설명하는 인용 후보로 적합하다.
