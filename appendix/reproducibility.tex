@@ -1,9 +1,0 @@
-\section{재현성 참고사항}
-
-Long PT는 B200 GPU 4장, device batch size 1, gradient accumulation
-64로 학습하였다. Short PT의 안정 설정은 B200 GPU 8장, device batch
-size 16, gradient accumulation 2이다. 두 run의 effective batch
-size는 256으로 같지만 GPU 구성이 다르므로 wall-clock time은
-비교하지 않는다. Short PT의 초기 run은 device batch size 32에서
-78\% 진행 후 한 rank의 OOM으로 종료되었고, 75\% 체크포인트부터 안정
-설정으로 재개하였다.
