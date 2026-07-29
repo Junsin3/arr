@@ -201,6 +201,13 @@
 - MolmoWebMix는 100K+ synthetic trajectories, 30K+ human
   demonstrations, atomic skill trajectory, referring-expression
   grounding, screenshot QA를 결합한다.
+- 최종 mixture는 trajectory 80%, perception 20%다. Perception은
+  grounding 15%와 screenshot QA 5%로 구성되며, trajectory에는
+  synthetic single-agent 35%, synthetic multi-agent 18%, human
+  trajectory 18%, human skill 5% 등이 포함된다.
+- grounding에는 7M+ synthetic QA와 1.1M PixMoPoints examples가
+  포함된다. Screenshot QA는 395개 사이트의 2,237,252 pairs이며
+  OCR 54%, affordance 26%, summarization 20%로 구성된다.
 - grounding specialist를 제외한 최종 agent는 perception과 모든
   trajectory 유형을 별도 stage가 아니라 하나의 SFT mixture에서
   함께 학습한다. 데이터 유형별 mixing ratio를 hyperparameter로
@@ -212,6 +219,10 @@
 - 같은 task instruction을 사용한 비교에서 AxTree agent가 만든
   synthetic trajectory가 human trajectory보다 성능이 높았으며,
   논문은 인간의 탐색적 detour와 행동 변동성을 원인 후보로 든다.
+- Scale ablation에서는 전체 데이터의 10%만으로도 최종 성능의
+  약 85--90%에 도달한다. Human data의 이득은 benchmark마다
+  일관되지 않았고, volume, task distribution, action set,
+  thought style, annotation noise가 원인 후보로 제시된다.
 - 우리 논문에 쓸 수 있는 근거:
   - perception과 trajectory를 함께 갖춘 최신 open web-agent
     recipe.
@@ -227,16 +238,69 @@
 ### GUI-Libra (Yang et al., 2026)
 
 - 논문: https://arxiv.org/abs/2602.22190
-- 일반적인 CoT SFT가 grounding을 해칠 수 있음을 관찰하고,
-  reasoning/action 혼합과 action-token reweighting을 제안한다.
+- Qwen2.5-VL-3B/7B와 81K GUI reasoning data를 사용해
+  ScreenSpot-v2 출력을 30-token bin으로 분석한다. Base와 CoT-SFT
+  모두 response length와 grounding accuracy가 음의 관계를 보였고,
+  250 tokens를 넘는 CoT에서 저하가 특히 컸다.
+- 동일 데이터로 full reasoning--action, action-only,
+  grounding-only SFT를 비교한다. Grounding-only는 소폭 개선되고
+  action-only는 소폭 저하되지만 long-CoT SFT는 큰 폭으로 저하되어,
+  SFT 자체보다 긴 reasoning sequence가 주된 간섭원임을 보인다.
+- Reasoning--action과 direct-action samples를 섞고 action 및
+  coordinate token의 loss를 높이는 action-aware SFT를 제안한다.
+  7B reasoning mode의 grounding accuracy는 standard SFT 79.0,
+  mixed SFT 81.4, ASFT 83.4로 증가한다.
+- 후속 RL까지 적용하면 7B에서 더 긴 Reason output(176.1 tokens)이
+  No-Reason output(124.4 tokens)보다 높은 grounding accuracy
+  (89.3 vs. 88.5)를 보인다. 따라서 길이의 악영향은 고정 법칙이
+  아니라 supervision과 optimization에 의존한다.
 - 우리 논문에 쓸 수 있는 근거:
-  - 더 긴 또는 더 많은 언어 supervision이 grounding에 자동으로
-    유리하지 않다는 최신 반례.
+  - 더 긴 언어 출력이 grounding에 자동으로 유리하지 않으며,
+    언어와 좌표 token 간 학습 균형이 중요하다는 최신 반례.
   - Long description이 understanding과 grounding에 서로 다른
     영향을 줄 수 있으므로 두 평가를 분리해야 한다는 논리.
 - 주의:
   - CoT reasoning과 webpage description은 같은 개입이 아니므로,
     직접 증거가 아니라 동기와 해석상의 관련 연구로 제한해야 한다.
+  - 이를 ``Long description이 grounding을 저해한다''는 직접
+    증거로 바꾸어 쓰면 안 된다.
+
+### KnowAda (Yanuka et al., 2025)
+
+- 논문: https://aclanthology.org/2025.naacl-long.527/
+- Small/medium VLM이 pretrained capability보다 복잡한 dense
+  caption을 학습하면 세부사항을 정확히 포착하지 못하고
+  hallucination이 증가할 수 있음을 분석한다.
+- Caption을 proposition-level visual questions로 분해해 base
+  model이 알지 못하는 부분을 찾고, 해당 부분만 model capability에
+  맞게 단순화하는 Knowledge-Adapted fine-tuning을 제안한다.
+- 단순한 caption complexity 축소나 일반 data curation만으로는
+  descriptiveness--hallucination trade-off가 해결되지 않았다고
+  보고한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - Long supervision은 정보량뿐 아니라 factuality와 learner
+    capability에 의존하므로 합성 품질과 hallucination filtering을
+    함께 보고해야 한다.
+  - 좌표와 텍스트 사실 검증을 Short/Long에 동일 적용하는 이유다.
+- 주의:
+  - Dense caption generation 연구이며 GUI agent transfer의
+    직접 증거는 아니다.
+
+### When More Words Say Less (Kapur et al., 2026)
+
+- 논문: https://aclanthology.org/2026.acl-short.34/
+- Description length와 specificity가 서로 다른 개념임을 지적한다.
+  같은 길이에서 정보량을 변화시킨 데이터로 사람은 길이와 무관하게
+  더 specific한 설명을 선호함을 보인다.
+- 우리 연구에 주는 설계상 함의:
+  - 독립 변수를 단순 length보다 description granularity/coverage로
+    정의해야 한다.
+  - 평균 token 수와 함께 언급 element, relation, state, function
+    coverage를 보고해야 한다.
+  - token 증가 자체와 유용한 GUI fact 증가를 동일시하면 안 된다.
+- 주의:
+  - Description 평가 연구이며 representation learning의 직접
+    증거는 아니다.
 
 ### VisualWebBench (Liu et al., 2024)
 
@@ -283,6 +347,33 @@
 화면 전체 description을 선택적 Short supervision과 포괄적 Long
 supervision으로 나누고, 그 차이를 PT→IT→Trajectory 전 과정에서
 추적한 연구는 현재까지 확인하지 못했다.
+
+## 현재 분석 설계 권고
+
+우선순위는 다음과 같다.
+
+1. **학습 ablation을 주된 원인 분석으로 둔다.** Long description에서
+   element-level detail 또는 click 이후 예상 상태를 제거한 조건은
+   실제 supervision을 조작하므로 성능 변화에 대한 인과적 근거를
+   제공한다. 가능하면 `Long-full`, `Long w/o element details`,
+   `Long w/o transition/affordance`를 동일 sample과 optimizer로
+   비교한다.
+2. **Embedding distance는 보조 mechanism probe로 둔다.** Short/Long
+   checkpoint가 같은 화면과 hard-negative 화면을 얼마나 구분하는지
+   retrieval 또는 matched--mismatched margin으로 측정할 수 있다.
+   단순 평균 cosine distance는 표현의 유용성이나 원인을 직접
+   증명하지 못하므로 단독 분석으로 두지 않는다.
+3. **한국어 subset 평가는 별도의 multilingual generalization
+   결과로 둔다.** 한국어 학습 모델을 보고하려면 필요하지만,
+   비공식 번역 subset은 표준 benchmark가 아니므로 번역 절차,
+   bilingual 검수, 원본 난이도 보존, 영어 원본과의 paired comparison을
+   명시하고 main claim보다 appendix/secondary table에 둔다.
+
+Compute가 제한되면 `Long w/o transition/affordance` 한 조건을 먼저
+권한다. Click 이후 상태 예측은 Short와 Long의 의미적 차별점이면서
+trajectory transfer와 가장 직접적으로 연결되기 때문이다. 다만
+element grounding이 주로 개선된 결과라면 `w/o element details`가
+더 진단적이므로, 최종 main table의 개선 축에 맞춰 하나를 선택한다.
 
 ## 원고에 넣기 좋은 주장 후보
 
