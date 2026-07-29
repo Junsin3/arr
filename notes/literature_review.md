@@ -959,3 +959,17 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
   - Long의 `element details`를 단순 문장 길이가 아닌 `type / visible text / visual attribute / location` coverage로 정량화한다.
   - whole-page Long에서 `w/o element details` ablation을 두어 region specificity가 grounding 향상을 설명하는지 확인한다.
   - 결과표에서 absolute difference와 relative improvement를 혼동하지 않는다. 위 Qwen 조건의 절대 향상은 12.74%p이고 상대 향상은 22.1%다.
+
+### Instruction Tuning with and without Context (Lee et al., 2026)
+
+- EACL 2026 long paper. context-augmented IT와 context-free IT로 만든 LLM backbone에 동일한 LLaVA visual alignment를 적용해, 언어 단계의 데이터 형식이 이후 시각 grounding에 미치는 영향을 분리한다.
+- 세 backbone family에서 CTX-VLM이 NOCTX-VLM보다 POPE F1과 ImageInWords F1이 일관되게 높다. Llama3.1-8B에서는 POPE 87.3→87.7, ImageInWords 54.5→56.8이며, 일반 VLM benchmark도 MMBench 68.6→70.2, ScienceQA 78.4→79.1, MME 1526.1→1534.4, GQA 63.4→64.1이다.
+- 장문 factuality 분석에서는 뒤쪽 atomic fact로 갈수록 NOCTX-VLM과의 차이가 커진다. 이는 Long output의 끝부분 정확도를 별도로 점검해야 한다는 직접 근거다.
+- 중요한 설계 세부사항: CTX-LLM은 context를 input에만 둔 것이 아니라 target response 앞에도 붙이되 context token에는 loss를 주지 않는다. appendix ablation에서 context에 loss를 주는 조건보다 주지 않는 조건의 ImageInWords F1이 55.1→56.8로 높다. 따라서 “context 존재”와 “어느 token에 loss를 주는가”를 구분해야 한다.
+- 해석 한계:
+  - text-only IT를 먼저 하고 이후 LLaVA alignment를 수행한 연구다. 우리의 `PT → multimodal IT` 순서와 방향이 반대이므로 직접적인 PT 보존 증거가 아니다.
+  - GUI, coordinate grounding, action 또는 trajectory를 평가하지 않는다.
+- 우리 원고 적용:
+  - PT 직후뿐 아니라 공통 IT 직후를 평가하고 `IT 후 - PT 직후` 변화량을 조건별로 보고한다.
+  - MolmoWeb QA와 LLaVA-NeXT 각각의 context 구조, image 사용 여부, completion-loss mask를 명시한다.
+  - Long description은 전체 평균 factuality 외에 문장/atomic-fact 위치별 정확도를 나눠, 뒤쪽 세부사항이 hallucination으로 채워지는지 확인한다.

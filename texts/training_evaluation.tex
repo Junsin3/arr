@@ -57,7 +57,11 @@ Short/Long checkpoint 쌍에서 별도로 분석한다.
 두 번째 의문은 PT에서 생긴 차이가 공통 IT와 Action adaptation
 이후에도 남는가이다. 과제특화 질의응답과 행동 supervision이 초기
 표현의 차이를 덮어쓴다면 PT 직후의 우위가 최종 모델에는 이어지지
-않을 수 있다. 마지막으로 동일한 trajectory까지 학습한 최종
+않을 수 있다. 반대로 context를 사용하는 instruction tuning이
+후속 VLM의 시각 grounding을 바꿀 수 있다는 관찰도 있으므로
+\citep{lee2026contextit}, 공통 IT를 단순한 출력 형식 정렬로
+가정하지 않고 각 조건의 IT 전후 변화량을 함께 보고한다. 마지막으로
+동일한 trajectory까지 학습한 최종
 경로를 비교하여 초기 supervision의 영향이 실제 agent와 비웹
 텍스트 밀집 이미지로의 전이까지 이어지는지 확인한다.
 
