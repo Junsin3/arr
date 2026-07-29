@@ -302,6 +302,97 @@
   - Description 평가 연구이며 representation learning의 직접
     증거는 아니다.
 
+### ShareGPT4V (Chen et al., 2024)
+
+- 논문: https://arxiv.org/abs/2311.12793
+- GPT-4V로 만든 100K 고품질 상세 caption과, 이 데이터로 학습한
+  captioner가 확장한 1.2M image--text pair를 구축한다.
+- 같은 수의 기존 SFT caption을 상세 caption으로 대체하는 비교에서
+  LLaVA-7B, LLaVA-1.5-13B, Qwen-VL-Chat-7B의 MME가 각각
+  222.8, 22.0, 22.3점 증가하고 MMBench도 각각 2.7, 1.3, 1.5점
+  증가했다고 보고한다.
+- pre-training과 SFT 모두에 상세 caption을 사용하며, caption의
+  상세도ㆍ정확도ㆍ데이터 규모가 modality alignment에 영향을 준다는
+  실험적 근거를 제공한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - LLaVA 계열에서도 상세 caption이 초기 정렬과 후속 SFT에 유용할
+    수 있다는 직접적인 범용 MLLM 선례다.
+  - 단순히 긴 문장을 생성하는 것이 아니라 실제 이미지를 본
+    teacher로 정확하고 세밀한 caption을 만드는 것이 중요하다는
+    데이터 생성 설계의 근거다.
+- 차이와 주의:
+  - 동일 이미지의 Short/Long을 완전히 통제하지 않고, caption 품질과
+    생성 방식도 함께 달라진다.
+  - 웹 GUI, 좌표 grounding, trajectory transfer는 평가하지 않는다.
+
+### LoTLIP (Wu et al., 2024)
+
+- 논문: https://proceedings.neurips.cc/paper_files/paper/2024/hash/77828623211df05497ce3658300dafd9-Abstract-Conference.html
+- 100M 이미지를 평균 약 136-token의 long text로 다시 caption하고,
+  short-text와 long-text 이해의 trade-off를 분석한다.
+- 통제 실험에서 long caption의 sub-caption 수가 증가할수록
+  long-text retrieval은 향상되지만, MSCOCO short-text retrieval과
+  ImageNet classification은 하락한다.
+- 이를 완화하기 위해 여러 텍스트 요약 지점을 두는 corner token을
+  제안하며, long-text 이해를 높이면서 short-text 성능을 회복한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 상세 supervision의 이득이 모든 평가축에 단조롭게 나타나지
+    않으므로 웹 이해, grounding, 일반화를 분리해 보고해야 한다.
+  - Long 조건이 좋아진 benchmark만 제시하지 않고 Short가 유리할 수
+    있는 능력도 함께 평가해야 한다.
+- 주의:
+  - contrastive language--image pre-training 연구이며
+    autoregressive GUI agent에 대한 직접 증거는 아니다.
+
+### Long Story Short (Salazar et al., 2026)
+
+- 논문: https://aclanthology.org/2026.findings-acl.2131/
+- 동일 CLIP 구조와 학습 objective를 유지한 통제 모델을 포함해
+  compositional training과 long-caption understanding의 양방향
+  전이를 분석한다.
+- long-caption data 자체의 효과를 분리하기 위해 ShareGPT4V로
+  표준 CLIP을 full fine-tuning한 LSS를 구성한다. 또한 ShareGPT4V,
+  DOCCI, sDCI, Localized Narratives를 같은 설정으로 비교한다.
+- 핵심 관측:
+  - long caption만으로 compositional generalization이 보장되지
+    않는다.
+  - ShareGPT4V와 사람이 작성하고 시각적으로 grounding된 DOCCI가
+    더 강하게 일반화한다.
+  - 1,000단어 이상의 합성 설명을 결합한 sDCI는 복잡성은 높지만
+    coherence와 visual grounding이 약할 수 있고, 작은 이미지
+    다양성과 함께 학습 후반에 과적합 양상을 보인다.
+  - 제한된 LoRA update보다 full fine-tuning이 의도한 표현 변화를
+    학습하는 데 중요할 수 있다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 독립변수를 단순 길이가 아니라 grounded fact coverage와
+    description quality로 정의해야 한다는 가장 최신의 직접 근거다.
+  - Stage 1의 사실ㆍ좌표 검증과 Stage 2의 Short/Long 변환을 분리한
+    이유를 뒷받침한다.
+  - Long의 이득이 없다면 “긴 설명은 무용하다”보다 teacher 품질,
+    grounding, 언어 분포, 학습 용량을 함께 점검해야 한다.
+- 주의:
+  - 자연 이미지 contrastive VLM 결과이므로 웹 GUI 및 agent
+    trajectory로의 전이는 본 논문이 직접 검증해야 한다.
+
+### GUI-G1 (Zhou et al., 2025)
+
+- 논문: https://papers.nips.cc/paper_files/paper/2025/hash/89dcbea9f19960edd7765068adb13b1d-Abstract-Conference.html
+- GUI grounding RL에서 input template, output reward, policy update를
+  각각 분석한다. 긴 reasoning chain이 grounding 성능을 낮출 수
+  있음을 관찰하고 direct answer를 유도하는 Fast Thinking template을
+  제안한다.
+- box 크기를 이용한 reward hacking과 쉬운 example 편향도 분석하며,
+  17K 공개 sample로 학습한 3B 모델이 ScreenSpot 90.3%,
+  ScreenSpot-Pro 37.1%를 보고한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 생성 언어량과 정밀 좌표 예측 사이의 간섭은 SFT뿐 아니라 RL
+    단계에서도 관찰된다.
+  - description의 효과를 grounding score와 분리하고 Action 및
+    Trajectory 이후까지 추적해야 한다.
+- 주의:
+  - reasoning output 길이와 PT description 상세도는 다른 변수다.
+    Long PT가 grounding을 저해한다는 직접 근거로 사용하면 안 된다.
+
 ### VisualWebBench (Liu et al., 2024)
 
 - 논문: https://arxiv.org/abs/2404.05955
@@ -345,7 +436,7 @@
 
 그러나 동일한 웹 스크린샷과 동일한 grounding mixture를 유지한 채,
 화면 전체 description을 선택적 Short supervision과 포괄적 Long
-supervision으로 나누고, 그 차이를 PT→IT→Trajectory 전 과정에서
+supervision으로 나누고, 그 차이를 PT→IT→Action→Trajectory 전 과정에서
 추적한 연구는 현재까지 확인하지 못했다.
 
 ## 현재 분석 설계 권고
@@ -401,6 +492,10 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
    training."  
    후보 인용: MultiUI; UI-TARS.
 
+7. "Long-caption gains depend on visual grounding and data quality rather
+   than length alone, and can trade off against short-text capabilities."
+   후보 인용: Long Story Short; LoTLIP; ShareGPT4V.
+
 ## 원고 위치별 인용 후보
 
 | 원고 위치 | 안전하게 지지되는 주장 | 후보 인용 |
@@ -411,13 +506,16 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 | Related Work | 상세 webpage description은 실제 최신 recipe에 사용된다. | MultiUI; UI-TARS |
 | Method | downstream data와 순서를 고정해야 초기 supervision의 효과를 분리할 수 있다. | ShowUI; MolmoWeb; UI-TARS |
 | Evaluation | understanding, grounding, agent execution은 분리해 측정해야 한다. | VisualWebBench; SeeClick; Mind2Web |
-| Discussion | 더 풍부한 언어 supervision의 효과는 능력별로 단조롭지 않을 수 있다. | GUI-Libra; MultiUI task ablation |
+| Discussion | 더 풍부한 언어 supervision의 효과는 능력별로 단조롭지 않을 수 있다. | GUI-Libra; GUI-G1; LoTLIP; MultiUI task ablation |
+| Discussion | Long의 효과는 길이뿐 아니라 grounding, teacher 품질, 데이터 다양성에 의존한다. | Long Story Short; ShareGPT4V; KnowAda |
 
 ## 다음 확인 순서
 
 1. MolmoWebMix의 screenshot QA/caption/grounding 비율 및 ablation 확인.
 2. GUI-Libra에서 CoT SFT가 grounding을 저해한 정확한 실험 조건 확인.
-3. Dense-caption 계열(ShareGPT4V, ALLaVA, UltraCaption)이 caption
-   length/coverage를 실제로 통제한 방식과 downstream 결과 확인.
-4. 각 논문의 BibTeX key를 `references.bib`와 대조하고, 원고 문장에
+3. ALLaVA와 UltraCaption이 caption length/coverage를 실제로
+   통제한 방식과 downstream 결과 확인.
+4. ShareGPT4V, LoTLIP, Long Story Short의 실험을 본문 가설과
+   Discussion에 최소한으로 연결.
+5. 각 논문의 BibTeX key를 `references.bib`와 대조하고, 원고 문장에
    넣을 인용만 선별한다.
