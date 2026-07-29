@@ -948,3 +948,14 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
   4. Web provenance: canonical URL, registered domain, template/layout cluster.
 - benchmark별로 발견된 overlap 수와 제거 후 최종 평가 수를 표로 남긴다. threshold는 결과를 보기 전에 고정하고, borderline pair를 수동 검수한다.
 - 한국어 subset은 영어 benchmark의 번역이므로 bilingual PT와 semantic overlap이 생길 수 있다. 영어 원본과 paired comparison에는 유용하지만 독립적인 contamination-free benchmark라고 부르지 않는다.
+
+### DeskVision: Large Scale Desktop Region Captioning for Advanced GUI Agents (Xu et al., 2025)
+
+- arXiv:2503.11170. 54,855개 desktop screenshot에 303,622개 interactive-element annotation을 구축한다. region caption은 element의 type, visible text, attribute를 기술한다.
+- 논문이 “rich/detailed caption”이라고 부르지만 caption 길이는 5--20 characters, 평균 12.2 characters다. 이는 상세도와 장문 여부가 같은 개념이 아님을 보여주는 GUI 사례다.
+- ScreenSpot icon/widget에서 `OS-Atlas-desktop`에 DeskVision을 더하면 Qwen2-VL-7B 평균이 57.60에서 70.34로, LLaVA-OneVision-7B가 25.32에서 31.92로 상승한다. 논문 본문이 말하는 22.1%와 26.1%는 각각 이 상대 향상률이다.
+- 해석 한계: DeskVision 유무 비교이며 token 수, 화면, annotation 수를 맞춘 Short/Long 대조가 아니다. 또한 region-level description이므로 whole-page description과 spatial scope도 다르다.
+- 우리 원고 적용:
+  - Long의 `element details`를 단순 문장 길이가 아닌 `type / visible text / visual attribute / location` coverage로 정량화한다.
+  - whole-page Long에서 `w/o element details` ablation을 두어 region specificity가 grounding 향상을 설명하는지 확인한다.
+  - 결과표에서 absolute difference와 relative improvement를 혼동하지 않는다. 위 Qwen 조건의 절대 향상은 12.74%p이고 상대 향상은 22.1%다.
