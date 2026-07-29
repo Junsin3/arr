@@ -1,40 +1,54 @@
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
-  font=\footnotesize,
-  box/.style={draw, rounded corners=2pt, align=center, minimum height=9mm,
-              inner xsep=6pt},
-  arrow/.style={-{Latex[length=2.2mm]}, thick},
-  eval/.style={draw, dashed, rounded corners=2pt, align=center,
-               inner sep=8pt}
+  font=\small,
+  stage/.style={draw, rounded corners=2pt, align=center,
+                minimum width=20mm, minimum height=8mm},
+  skip/.style={draw, rounded corners=2pt, align=center,
+               minimum width=20mm, minimum height=8mm, dashed,
+               text=gray},
+  arrow/.style={-{Latex[length=2mm]}, semithick},
+  row/.style={font=\small\bfseries, anchor=east}
 ]
-\node[box, fill=stagegray] (c0) {C0\\Base};
-\node[box, fill=shortblue, above right=8mm and 14mm of c0] (c1) {C1\\Short PT};
-\node[box, fill=longorange, below right=8mm and 14mm of c0] (c2) {C2\\Long PT};
-\node[box, fill=stagegray, right=30mm of c0] (c3) {C3\\Base + IT};
-\node[box, fill=shortblue, right=18mm of c1] (c4) {C4\\Short + IT};
-\node[box, fill=longorange, right=18mm of c2] (c5) {C5\\Long + IT};
-\node[box, fill=stagegreen, right=24mm of c3] (c6) {C6\\No PT Agent};
-\node[box, fill=stagegreen, right=24mm of c4] (c7) {C7\\Short PT Agent};
-\node[box, fill=stagegreen, right=24mm of c5] (c8) {C8\\Long PT Agent};
+\node[row] at (-0.5,0) {No PT};
+\node[row] at (-0.5,-1.05) {PT, no IT};
+\node[row] at (-0.5,-2.10) {Short};
+\node[row] at (-0.5,-3.15) {Long bilingual};
 
-\draw[arrow] (c0) -- node[above,sloped]{Short PT} (c1);
-\draw[arrow] (c0) -- node[below,sloped]{Long PT} (c2);
-\draw[arrow] (c0) -- (c3);
-\draw[arrow] (c1) -- (c4);
-\draw[arrow] (c2) -- (c5);
-\draw[arrow] (c3) -- (c6);
-\draw[arrow] (c4) -- (c7);
-\draw[arrow] (c5) -- (c8);
+\node[stage,fill=stagegray] (base0) at (1,0) {Base};
+\node[stage,fill=stagegray] (base1) at (1,-1.05) {Base};
+\node[stage,fill=stagegray] (base2) at (1,-2.10) {Base};
+\node[stage,fill=stagegray] (base3) at (1,-3.15) {Base};
 
-\node[eval, fit=(c0)(c1)(c2)(c3)(c4)(c5),
-      label={[font=\small\bfseries]below:Web Understanding}] {};
-\node[eval, fit=(c6)(c7)(c8),
-      label={[font=\small\bfseries]below:Web Agent}] {};
+\node[skip]  (pt0) at (3.6,0) {PT};
+\node[stage,fill=stagegray] (it0) at (6.2,0) {IT};
+\node[stage,fill=stagegreen] (act0) at (8.8,0) {Action};
+\node[stage,fill=stagegreen] (traj0) at (11.4,0) {Trajectory};
+
+\node[stage,fill=longorange] (pt1) at (3.6,-1.05) {PT};
+\node[skip]  (it1) at (6.2,-1.05) {IT};
+\node[stage,fill=stagegreen] (act1) at (8.8,-1.05) {Action};
+\node[stage,fill=stagegreen] (traj1) at (11.4,-1.05) {Trajectory};
+
+\node[stage,fill=shortblue] (pt2) at (3.6,-2.10) {Short PT};
+\node[stage,fill=stagegray] (it2) at (6.2,-2.10) {IT};
+\node[stage,fill=stagegreen] (act2) at (8.8,-2.10) {Action};
+\node[stage,fill=stagegreen] (traj2) at (11.4,-2.10) {Trajectory};
+
+\node[stage,fill=longorange] (pt3) at (3.6,-3.15) {Long PT\\EN+KO};
+\node[stage,fill=stagegray] (it3) at (6.2,-3.15) {IT};
+\node[stage,fill=stagegreen] (act3) at (8.8,-3.15) {Action};
+\node[stage,fill=stagegreen] (traj3) at (11.4,-3.15) {Trajectory};
+
+\foreach \r in {0,1,2,3} {
+  \draw[arrow] (base\r) -- (pt\r);
+  \draw[arrow] (pt\r) -- (it\r);
+  \draw[arrow] (it\r) -- (act\r);
+  \draw[arrow] (act\r) -- (traj\r);
+}
 \end{tikzpicture}
-\caption{\textbf{단계별 학습 및 평가 파이프라인.} C0--C5는 PT
-효과의 발생과 IT 이후 유지 여부를 측정한다. C6--C8은 동일한 행동
-궤적 학습 후 서술 상세도가 최종 웹 에이전트에 미치는 영향을
-비교한다.}
+\caption{\textbf{실제로 준비한 네 학습 경로.} 점선 상자는 해당
+단계를 건너뜀을 뜻한다. 각 단계의 데이터 구성과 비교 목적은
+본문에서 설명한다.}
 \label{fig:pipeline}
 \end{figure*}

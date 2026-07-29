@@ -2,27 +2,41 @@
 
 \subsection{학습 단계}
 
-기반 모델은 Qwen3.5-9B이다. 모든 PT에서 전체 파라미터를 1 epoch
-학습하며 bfloat16, cosine learning rate $10^{-5}$, warmup 3\%,
-completion-only loss, 최대 길이 8192, effective batch size 256을
-사용한다. 이미지는 최대 2,359,296 pixel로 입력하며 현재 해상도에서
-3,009 image token에 해당한다. 모든 PT run에 gradient checkpointing을
-적용한다.
+기반 모델은 Qwen3.5-9B이다. 전체 학습은 PT, IT, Action,
+Trajectory의 네 모듈로 구성하며 실험 목적에 따라 일부 모듈을
+건너뛴다. 모든 PT에서 전체 파라미터를 1 epoch 학습하며 bfloat16,
+cosine learning rate $10^{-5}$, warmup 3\%, completion-only loss,
+최대 길이 8192, effective batch size 256을 사용한다. 이미지는 최대
+2,359,296 pixel로 입력하며 현재 해상도에서 3,009 image token에
+해당한다. 모든 PT run에 gradient checkpointing을 적용한다.
 
-PT 이후 Base, Short PT, Long PT 모델은 같은 순서의 100K IT 예제를
-학습한다. 이 데이터는 MolmoWeb SyntheticQA 70K와 필터링한
-LLaVA-NeXT 30K로 구성한다. 후속 일반화 평가와의 중복을 막기 위해
-LLaVA-NeXT에서 DocVQA, ChartQA, DVQA, AI2D 출처를 제거한다. 세 IT
-체크포인트에는 다시 동일한 99,999개의 trajectory 예제를 학습한다.
-행동 공간은 \texttt{click}, \texttt{type}, \texttt{press},
-\texttt{scroll}, \texttt{goto}, \texttt{go\_back}, \texttt{finish}의
-일곱 가지로 통일한다.
+IT는 총 100K 예제로, MolmoWeb SyntheticQA 70K와 필터링한
+LLaVA-NeXT 30K를 같은 순서로 학습한다. 후속 일반화 평가와의
+중복을 막기 위해 LLaVA-NeXT에서 DocVQA, ChartQA, DVQA, AI2D
+출처를 제거한다. IT 또는 PT checkpoint에는 동일한 2K Action
+예제로 출력 계약과 기본 행동을 먼저 적응시킨 뒤, 동일한 약 100K
+trajectory 예제를 학습한다. 행동 공간은 \texttt{click},
+\texttt{type}, \texttt{press}, \texttt{scroll}, \texttt{goto},
+\texttt{go\_back}, \texttt{finish}의 일곱 가지로 통일한다.
 
 \input{figures/training_pipeline}
 
-그림 \ref{fig:pipeline}과 표 \ref{tab:checkpoints}는 전체 비교 구조를
-보여준다. PT가 없는 분기는 PT 자체의 효과와 Short/Long 간 차이를
-분리하는 기준선이다.
+그림 \ref{fig:pipeline}과 표 \ref{tab:checkpoints}는 실제로 준비한
+네 경로를 보여준다. No-PT 경로는
+Base$\rightarrow$IT$\rightarrow$Action$\rightarrow$Trajectory로
+후속 학습만 적용한 기준선이다. PT-no-IT 경로는
+Base$\rightarrow$PT$\rightarrow$Action$\rightarrow$Trajectory로
+IT를 생략했을 때 PT 신호가 행동 학습으로 직접 전달되는지를 본다.
+Short 경로는 간결한 영어 caption PT 뒤에 모든 후속 단계를
+적용한다. Long bilingual 경로는 영어와 한국어를 합친 가장 큰
+Long PT mixture(약 2.6M examples) 뒤에 같은 IT, Action,
+Trajectory 단계를 적용한다.
+
+이 네 경로의 최종 비교는 실제 recipe의 효용을 보여주지만, Short와
+Long bilingual은 학습 언어와 PT 규모도 다르므로 그 차이를
+description granularity의 인과 효과로만 해석하지 않는다. 상세도의
+통제 효과는 언어, 화면, grounding mixture, 후속 sample을 맞춘
+Short/Long checkpoint 쌍에서 별도로 분석한다.
 
 \input{tables/checkpoints}
 
@@ -35,22 +49,22 @@ LLaVA-NeXT에서 DocVQA, ChartQA, DVQA, AI2D 출처를 제거한다. 세 IT
 많은 정보를 나열하는 목표가 핵심 요소의 위치를 찾는 능력에도
 유리한지는 자명하지 않으므로 이해와 그라운딩을 분리해 측정한다.
 
-두 번째 의문은 PT에서 생긴 차이가 공통 IT 이후에도 남는가이다.
-과제특화 질의응답과 명령어 supervision이 초기 표현의 차이를
-덮어쓴다면 PT 직후의 우위가 최종 모델에는 이어지지 않을 수 있다.
-마지막으로 동일한 행동 궤적까지 학습한 뒤 C6--C8을 비교하여,
-서술 상세도의 영향이 실제 trajectory-following agent와 비웹
+두 번째 의문은 PT에서 생긴 차이가 공통 IT와 Action adaptation
+이후에도 남는가이다. 과제특화 질의응답과 행동 supervision이 초기
+표현의 차이를 덮어쓴다면 PT 직후의 우위가 최종 모델에는 이어지지
+않을 수 있다. 마지막으로 동일한 trajectory까지 학습한 최종
+경로를 비교하여 초기 supervision의 영향이 실제 agent와 비웹
 텍스트 밀집 이미지로의 전이까지 이어지는지 확인한다.
 
 \subsection{평가 벤치마크}
 
-C0--C5는 VisualWebBench의 이해와 그라운딩을 분리하여 평가하고,
-WebSRC, WebClick, ScreenSpot-v2, 한국어 웹 벤치마크를 함께
-사용한다. DocVQA의 ANLS와 ChartQA의 relaxed accuracy로 비웹 텍스트
-밀집 시각 이해 전이를 측정한다. C6--C8의 주요 에이전트 평가는
-Multimodal-Mind2Web이며 cross-task, cross-website, cross-domain
-분할을 각각 보고한다. 좌표 출력은 모든 평가에서 0--999 규약으로
-해석한다.
+PT와 IT의 중간 checkpoint는 VisualWebBench의 이해와 그라운딩을
+분리하여 평가하고, WebSRC, WebClick, ScreenSpot-v2, 한국어 웹
+평가 subset을 함께 사용한다. DocVQA의 ANLS와 ChartQA의 relaxed
+accuracy로 비웹 텍스트 밀집 시각 이해 전이를 측정한다. 최종
+trajectory 모델의 주요 에이전트 평가는 Multimodal-Mind2Web이며
+cross-task, cross-website, cross-domain 분할을 각각 보고한다.
+좌표 출력은 모든 평가에서 0--999 규약으로 해석한다.
 
 \subsection{주요 결과 (진행 중)}
 
@@ -58,9 +72,10 @@ Multimodal-Mind2Web이며 cross-task, cross-website, cross-domain
 \input{tables/agent_results}
 
 하나의 종합 점수만으로 결론을 선택하지 않는다. 예를 들어 Long
-caption은 이해 성능에는 유리하지만 정밀 그라운딩에는 불리할 수
-있고, PT 직후의 차이가 IT 이후 사라질 수도 있다. 따라서 C1--C2,
-C4--C5, C7--C8을 각각 비교하고 C0, C3, C6으로 PT 자체의 한계
-효과를 측정한다. 벤치마크가 허용하는 경우 paired bootstrap
-confidence interval을 보고한다. 다만 학습 seed가 하나이므로 통계적
-주장은 run 간 분산이 아니라 평가 표본의 불확실성으로 제한한다.
+description은 이해에는 유리하지만 정밀 그라운딩에는 불리할 수
+있고, PT 직후의 차이가 후속 단계에서 사라질 수도 있다. 따라서
+matched Short/Long 쌍은 PT, IT, Action, Trajectory 직후에 각각
+비교하고, No-PT 경로로 PT의 한계 효과를 측정한다. 벤치마크가
+허용하는 경우 paired bootstrap confidence interval을 보고한다.
+다만 학습 seed가 하나이므로 통계적 주장은 run 간 분산이 아니라
+평가 표본의 불확실성으로 제한한다.

@@ -51,8 +51,8 @@ mixture에서 함께 최적화하지만
 \textbf{간결한 설명(Short)}과 \textbf{포괄적 설명(Long)}을
 생성한다. 두 조건은 좌표 규약, 외부 그라운딩 데이터, 기반 모델,
 최적화 설정, 후속 데이터를 공유하며, Stage 2에서 어떤 정보를
-얼마나 남겨 서술하는지만 다르다. 효과는 PT 직후, 공통 IT 직후,
-Trajectory SFT 직후의 세 지점에서 측정한다. 이 설계는 Long
+얼마나 남겨 서술하는지만 다르다. 효과는 PT 직후와 IT, Action,
+Trajectory를 거친 중간ㆍ최종 checkpoint에서 측정한다. 이 설계는 Long
 supervision이 웹 이해를 개선하는지뿐 아니라, 그 차이가 과제특화
 학습 이후 최종 에이전트까지 이어지는지를 구분한다.
 
@@ -60,8 +60,9 @@ supervision이 웹 이해를 개선하는지뿐 아니라, 그 차이가 과제�
 \begin{itemize}
     \item 그라운딩 양과 후속 데이터를 고정한 상태에서 웹 GUI
     사전학습의 서술 상세도를 비교하는 통제 실험을 설계한다.
-    \item 아홉 개 체크포인트를 통해 PT의 효과가 어느 단계에서
-    나타나고 후속 학습 이후까지 유지되는지 추적한다.
+    \item PT, IT, Action, Trajectory의 단계별 checkpoint를 통해
+    초기 supervision의 효과가 최종 웹 에이전트까지 유지되는지
+    추적한다.
     \item 접근성 트리의 bounding box 좌표를 teacher가 추정하지 않고
     인용하도록 하며, 프로그램 검증으로 좌표 발명을 제거하는 2단계
     합성 파이프라인을 제시한다.

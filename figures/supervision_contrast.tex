@@ -2,30 +2,31 @@
 \centering
 \begin{tikzpicture}[
   font=\footnotesize,
-  box/.style={draw, rounded corners=2pt, align=center, inner sep=4pt},
+  box/.style={draw, rounded corners=2pt, align=center,
+              minimum height=9mm, inner sep=3pt},
   arrow/.style={-{Latex[length=2mm]}, thick},
-  node distance=4mm
+  note/.style={font=\scriptsize, align=center}
 ]
-\node[box, fill=stagegray, text width=.84\columnwidth] (input)
-  {동일한 웹 스크린샷 + 동일한 Stage-1 구조화 사실\\
-   \texttt{page\_type, visible\_facts, affordances, coordinates}};
-\node[box, fill=shortblue, below=6mm of input, xshift=-.205\columnwidth,
-      text width=.34\columnwidth] (short)
-  {\textbf{Short PT}\\3--5문장, 평균 110단어\\핵심 목적ㆍ상태 선택\\상호작용 목표 최대 2개};
-\node[box, fill=longorange, below=6mm of input, xshift=.205\columnwidth,
-      text width=.34\columnwidth] (long)
-  {\textbf{Long PT}\\평균 3,656자\\모든 사실ㆍ행동 보존\\표와 좌표까지 포괄적 서술};
-\node[box, fill=stagegreen, below=7mm of $(short.south)!0.5!(long.south)$,
-      text width=.84\columnwidth] (control)
-  {공통 통제: 1.2M grounding 예제, 0--999 좌표계,\\
-   9B backbone, optimizer, IT 데이터, trajectory 데이터};
-\draw[arrow] (input.south) -- (short.north);
-\draw[arrow] (input.south) -- (long.north);
-\draw[arrow] (short.south) -- (control.north west);
-\draw[arrow] (long.south) -- (control.north east);
+\node[box, fill=stagegray, text width=.72\columnwidth] (screen)
+  {\textbf{동일한 웹 화면}\\Stage 1: 화면 사실과 좌표 추출};
+\node[box, fill=shortblue, below=7mm of screen,
+      xshift=-.20\columnwidth, text width=.31\columnwidth] (short)
+  {\textbf{Short}\\핵심 정보 선택};
+\node[box, fill=longorange, below=7mm of screen,
+      xshift=.20\columnwidth, text width=.31\columnwidth] (long)
+  {\textbf{Long}\\세부 정보 보존};
+\node[box, fill=stagegreen, below=9mm of $(short.south)!0.5!(long.south)$,
+      text width=.72\columnwidth] (train)
+  {\textbf{동일한 후속 학습과 평가}};
+\draw[arrow] (screen.south) -- (short.north);
+\draw[arrow] (screen.south) -- (long.north);
+\draw[arrow] (short.south) -- (train.north west);
+\draw[arrow] (long.south) -- (train.north east);
+\node[note, below=1mm of screen.south] {Stage 2};
 \end{tikzpicture}
-\caption{\textbf{서술 상세도 비교의 개념도.} 두 조건은 같은 화면과
-구조화 사실에서 출발하며, 무엇을 얼마나 남겨 서술하는지만 다르다.
-그라운딩 데이터와 후속 학습은 동일하게 유지한다.}
+\caption{\textbf{통제된 서술 상세도 비교.} Stage 1이 동일한 화면에서
+근거가 되는 사실과 좌표를 추출하면, Stage 2는 이를 핵심 정보만
+선택한 Short 또는 세부 정보를 보존한 Long supervision으로 변환한다.
+인과 비교에서는 그라운딩 데이터와 후속 학습을 동일하게 유지한다.}
 \label{fig:contrast}
 \end{figure}
