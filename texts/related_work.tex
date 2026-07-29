@@ -89,6 +89,11 @@ trajectory에 계층적 reasoning 및 action 결과의 expectation--reflection�
 저하시킨다는 ablation은 중간 checkpoint에서 지각과 agent 성능을
 따로 추적해야 함을 보여준다. 다만 Stage 2에도 Stage 1과 유사한
 sample이 섞여 있어, 두 능력의 완전한 인과 분해로 볼 수는 없다.
+비영어 GUI를 다룬 AgentCPM-GUI는 12M grounding-aware PT 뒤에
+중국어 55K trajectory와 선별한 영어 trajectory를 함께 SFT하고
+중ㆍ영 benchmark를 모두 평가한다 \citep{zhang2025agentcpm}.
+그러나 언어별 단독 학습 대조군이 없어 bilingual mixture 자체의
+효과는 분리되지 않는다.
 
 후속 언어 supervision이 좌표 예측에 항상 이로운 것도 아니다.
 GUI-Libra는 긴 CoT SFT에서 response length와 grounding accuracy의

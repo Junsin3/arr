@@ -820,3 +820,11 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 - 해석: Stage 1은 grounding, Stage 2는 multi-step success에 더 직접적으로 연결된다. 그러나 Stage 2에 30K `Stage 1-aligned` samples가 포함되어 완전한 factor isolation은 아니다.
 - 우리 원고 적용: PT→IT→Action→Trajectory의 모든 checkpoint를 평가해야 하는 직접 근거다. Long의 expected post-click outcome 효과가 PT 직후보다 Trajectory 이후 커지는지 보는 interaction 분석을 정당화한다.
 - causal claim 조건: `Long-full` 대 `Long w/o transition/affordance`가 있어야 textual expectation의 기여를 말할 수 있다. stage별 상관만으로 mechanism을 확정하지 않는다.
+### AgentCPM-GUI (Zhang et al., 2025)
+
+- EMNLP 2025 System Demonstrations. Stage I은 OCR/widget localization 중심 12M grounding-aware PT, Stage II는 중국어와 영어 trajectory SFT, Stage III는 GRPO 기반 RFT다.
+- 중국어 실제 app 30여 개에서 55K trajectories/470K steps를 수집하고 AITW, AITZ, AMEX, AndroidControl, GUI-Odyssey 영어 데이터를 결합한다. SFT 전체는 일반 multimodal data 50%를 포함한 6.9M instances다.
+- CAGUI는 중국어 Fun2Point, Text2Point, Bbox2Text 및 action prediction을 평가하고, 영어 AndroidControl/GUI-Odyssey/AITZ도 함께 보고한다.
+- RFT ablation은 어려운 long-horizon benchmark에는 이득이 있지만 AndroidControl-High와 CAGUI에서는 SFT와 같거나 소폭 낮다. 후속 stage의 이득이 모든 분포에서 단조롭지 않다는 근거다.
+- 중요한 한계: Chinese-only, English-only, bilingual mixture 대조가 없다. 따라서 cross-lingual 평가 성공은 multilingual recipe의 선례지만 언어 혼합의 인과 효과를 입증하지 않는다.
+- 우리 원고 적용: Long bilingual 2.6M의 한국어 성능을 보고하되 영어 혼합의 효과로 단정하지 않는다. 언어별 matched PT 또는 동일 화면의 EN/KO paired evaluation이 필요하다.
