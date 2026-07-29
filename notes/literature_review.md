@@ -15,7 +15,7 @@
 
 ### Dense and Aligned Captions (DAC) (Doveh et al., 2023)
 
-- 논문: https://arxiv.org/abs/2305.19595
+- 최종 논문: NeurIPS 2023, https://proceedings.neurips.cc/paper_files/paper/2023/hash/efe406d6d2674d176cdcd958ce605d17-Abstract-Conference.html
 - 일반 이미지--텍스트 사전학습에서 caption의 두 속성, 즉
   image--text alignment와 화면 세부사항을 얼마나 빠짐없이 언급하는지
   나타내는 density가 compositional reasoning을 제한할 수 있다고
@@ -53,7 +53,7 @@
 
 ### SeeClick (Cheng et al., 2024)
 
-- 논문: https://arxiv.org/abs/2401.10935
+- 최종 논문: ACL 2024 long paper, https://aclanthology.org/2024.acl-long.505/
 - Qwen-VL에 GUI grounding continual pre-training을 약 10K step
   수행한 뒤 MiniWob, AITW, Mind2Web에 각각 적응한다.
 - PT 과제는 referring expression에서 point 또는 bounding box를

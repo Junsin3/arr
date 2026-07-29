@@ -1,156 +1,48 @@
 \section{관련 연구}
 
-\paragraph{멀티모달 사전학습과 명령어 튜닝.}
-LLaVA는 시각 인코더와 언어모델을 projection으로 연결하고 합성
-시각 명령어 데이터로 학습하는 방식을 보였다
-\citep{liu2023llava}. LLaVA-1.5는 데이터와 학습 설정을 개선하여
-강한 기준선을 제시하였다 \citep{liu2024llavanext}. 이 계열은
-시각--언어 정렬과 후속 명령어 튜닝을 구분한다. 본 연구는 이
-구조를 웹 GUI로 좁혀, 기반 모델과 후속 학습을 고정하고 초기
-화면 description의 상세도만 변화시킨다.
-멀티모달 모델의 순차 instruction tuning에서는 앞서 학습한
-시각--언어 과제의 forgetting이 관찰되며, joint training과 replay가
-이를 완화한다 \citep{he2026continual}. 이는 동일한 IT를 적용하는
-것만으로 서로 다른 PT 능력이 같은 비율로 보존된다고 가정할 수
-없음을 뜻한다.
-Vision-Flan은 187개 시각 task의 human-labeled instruction을 먼저
-학습한 뒤 합성 대화 데이터를 적용하는 순서가 단일 혼합보다
-우수하며, 소량의 GPT-4 합성 데이터도 주로 응답 형식을 정렬할 수
-있음을 보였다 \citep{xu2024visionflan}. 따라서 IT의 예제 수만으로
-능력 획득을 설명하기보다 task coverage와 source별 역할을 함께
-보고해야 한다.
-또한 context-augmented instruction으로 학습한 LLM을 동일한
-시각--언어 정렬에 사용하면 context-free LLM보다 이미지
-grounding과 장문 응답의 factual consistency가 높아질 수 있다
-\citep{lee2026contextit}. 이 개입은 본 연구의 multimodal IT와
-같지 않지만, IT 데이터의 형식이 이후 시각 입력을 사용하는 방식
-자체를 바꿀 수 있음을 보여준다.
+\paragraph{스크린샷 기반 GUI 이해와 그라운딩.}
+스크린샷 기반 GUI 모델은 구조화된 DOM 없이 화면에서 요소를
+찾고 그 의미를 이해하도록 학습한다. SeeClick은 GUI grounding
+continual pre-training 뒤에 downstream agent를 적응시키며,
+중간 grounding 향상과 agent 성능을 함께 추적했다
+\citep{cheng2024seeclick}. GUICourse는 웹 화면의 텍스트, 좌표,
+레이아웃 순서를 장문 target으로 예측하고 데이터 규모에 따른 OCR,
+grounding, navigation 향상을 보고했으며
+\citep{chen2025guicourse}, MultiUI는 webpage caption을 포함한
+여러 이해 과제를 함께 학습해 웹과 문서 이해로의 전이를 보였다
+\citep{liu2025multiui}. 이 결과들은 화면 supervision의 유용성을
+보이지만, 같은 화면에서 Short와 Long을 맞추지 않아 설명 상세도의
+효과가 데이터 규모와 과제 mixture에 섞여 있다.
 
-\paragraph{설명 supervision의 상세도.}
-범용 시각--언어 학습에서는 caption이 객체뿐 아니라 속성, 관계,
-상태를 얼마나 포괄하는지가 compositional reasoning에 영향을 줄 수
-있다 \citep{doveh2023dac}. 상세 caption은 범용 MLLM의 초기 정렬과
-후속 SFT를 개선할 수 있지만 \citep{chen2024sharegpt4v}, long-text
-사전학습의 이득은 short-text retrieval 및 분류 성능과 trade-off를
-보일 수 있다 \citep{wu2024lotlip}. 더 최근의 통제 분석은
-long-caption 일반화가 길이 자체보다 시각적 grounding, 데이터 품질,
-학습 범위에 민감함을 보여준다 \citep{salazar2026longstory}.
-Dense-caption 연구는 포괄적인 설명이
-세밀한 시각 이해에 유용할 가능성을 보이는 한편, 학습 모델이
-인지하기 어려운 세부사항을 그대로 포함하면 hallucination이 증가할
-수 있음을 보고한다 \citep{yanuka2025knowada}. 또한 description
-length와 정보 specificity는 분리해야 하며, 같은 길이라도 어떤
-사실을 포함하는지가 중요하다 \citep{kapur2026morewords}. 따라서
-본 연구의 Short/Long은 단순 출력 token 수보다 동일 화면에서
-보존하는 GUI 사실의 범위와 상세도 차이로 정의한다.
+기존 GUI caption 연구는 상세함이 반드시 긴 문장을 뜻하지 않음을
+보여준다. AutoGUI는 전후 화면에서 만든 기능 설명을 element HTML과
+축약 설명에 비교해 기능ㆍaffordance 정보의 이점을 분석했고
+\citep{li2025autogui}, DeskVision은 평균 12.2자의 region caption에
+요소 type, visible text, attribute를 담아 grounding을 개선했다
+\citep{xu2025deskvision}. 본 연구는 이들과 달리 whole-page
+description을 대상으로 하며, 동일한 구조화 사실에서 보존되는
+정보의 범위를 통제한다.
 
-\paragraph{웹페이지 이해.}
-WebSRC는 웹 질의응답이 텍스트 의미뿐 아니라 페이지 구조의 이해를
-요구함을 보였으며 \citep{chen2021websrc}, VisualWebBench는 OCR,
-캡셔닝, 질의응답, 행동 예측, 그라운딩을 포함하는 일곱 가지
-웹페이지 과제로 관련 능력을 세분화한다
-\citep{liu2024visualwebbench}. MultiUI는 1M개의 웹페이지 UI에서
-7.3M개의 멀티모달 명령어 예제를 구축한다. 이 데이터에는 250K개의
-포괄적 webpage caption이 포함되며, 과제 유형별 ablation은 caption
-supervision이 VisualWebBench와 DocVQA에 기여함을 보인다
-\citep{liu2025multiui}. 그러나 동일 화면에서 description
-granularity를 통제하지는 않는다. GUICourse는 10M개 웹 화면의
-모든 텍스트, 좌표, 레이아웃 순서를 하나의 장문 target으로
-예측하도록 사전학습하고, 그 데이터량을 늘릴수록 OCR, text-to-box,
-단일 단계 웹 navigation 점수가 함께 증가함을 보였다
-\citep{chen2025guicourse}. 그러나 이 결과 역시 장문 target의
-\emph{구성}과 데이터 규모를 분리하지 않으므로, 동일 화면에서
-Short와 Long을 맞춘 본 연구의 비교가 필요하다.
-AutoGUI는 전후 UI state에서 합성한 상세 기능 설명을 같은 규모의
-element HTML 및 축약 기능 설명과 비교하고, 25K 조건에서 기능 예측,
-MoTIF, ScreenSpot grounding 모두 상세 기능 설명이 우세함을
-보고한다 \citep{li2025autogui}. 이는 기능ㆍaffordance 정보의
-가능성을 직접 뒷받침하지만, 화면 전체 Long description과
-Short caption의 비교는 아니다.
-DeskVision은 desktop UI element에 type, visible text, attribute를
-담은 region caption을 추가했을 때 두 LVLM의 ScreenSpot
-icon/widget grounding이 개선됨을 보였다
-\citep{xu2025deskvision}. 그러나 caption은 평균 12.2자로
-짧고, 기존 데이터에 DeskVision을 추가한 비교이므로 설명
-\emph{길이}의 효과를 분리하지 않는다. 이 사례는 ``상세함''을
-token 수가 아니라 정보 종류와 spatial scope로 정의해야 함을
-보완적으로 보여준다.
+\paragraph{GUI agent의 단계적 학습.}
+GUI agent 학습은 지각ㆍ그라운딩과 행동ㆍtrajectory supervision을
+단계적으로 연결하거나 하나의 mixture에서 결합한다. UI-TARS는
+element description과 dense caption을 상호작용 궤적과 함께
+사용하고, MolmoWeb은 대규모 screenshot QA와 grounding을
+trajectory 중심 SFT mixture에 포함한다
+\citep{qin2025uitars,gupta2026molmoweb}. Aguvis와 InfiGUIAgent는
+grounding 중심 단계와 planning 또는 expectation--reflection
+단계를 구분하여 중간 능력과 최종 수행을 분석한다
+\citep{xu2025aguvis,liu2026infiguiagent}. 이들 연구는 단계적 평가의
+필요성을 보여주지만 초기 description의 상세도를 독립 변수로
+다루지는 않는다.
 
-\paragraph{GUI 그라운딩과 에이전트 학습.}
-SeeClick은 GUI grounding continual pre-training 뒤에 downstream
-agent를 적응시키고, grounding checkpoint의 향상과 agent 성능이
-함께 증가함을 보고한다 \citep{cheng2024seeclick}. Aguvis는
-grounding과 planning/reasoning을 두 단계로 나누어 중간 모델과
-최종 모델을 비교한다 \citep{xu2025aguvis}. UI-TARS는 element
-description과 dense caption을 포함한 GUI 지각 데이터, 통합 행동
-표현, 상호작용 궤적을 continual-training recipe에 결합한다
-\citep{qin2025uitars}. MolmoWeb은 8.3M개의 grounding examples와
-2.2M개의 screenshot QA를 trajectory 중심의 단일 SFT mixture에
-포함하며, mixture와 trajectory source가 결과에 영향을 준다고
-보고한다 \citep{gupta2026molmoweb}. 이들 결과에서는 description
-상세도의 기여가 데이터 규모, 과제 유형, 후속 행동 학습과 얽혀
-있다. 실제로 UI control data를 확장하면 in-domain 성능은 꾸준히
-향상되지만, 새로운 app과 task로의 전이는 특히 고수준 instruction에서
-더 느리게 증가한다 \citep{li2024datascale}. 따라서 규모가 다른
-recipe의 최종 성능 차이를 description 상세도의 효과로만 해석할 수
-없다.
-FineState-Bench는 GUI 실행을 element localization, interaction,
-exact target-state 도달로 나누고, localization hint를 주는 통제
-조건에서도 남는 오류를 측정한다 \citep{ji2026finestate}. 시각
-위치 힌트가 exact-state 성공을 크게 높이지만 오류를 모두 없애지는
-못한 결과는 grounding이 agent 성공의 중요한 병목이면서 충분조건은
-아님을 보여준다.
-
-Trajectory 학습에서는 데이터의 양뿐 아니라 생성 및 검증 방식도
-중요하다. AgentTrek은 웹 tutorial을 실제 환경에서 guided replay한
-뒤 VLM evaluator로 실패 궤적을 걸러내고, 관측ㆍreasoningㆍgrounded
-action을 포함한 약 10K trajectory로 grounding과 planning을 함께
-개선한다 \citep{xu2025agenttrek}. OpAgent는 후속 학습 데이터를
-grounding, acting, planning primitive로 나누고 static SFT 이후
-실제 웹의 feedback을 이용한다 \citep{guo2026opagent}. 이는
-trajectory의 source, action representation, filtering, 학습 stage가
-최종 점수를 바꿀 수 있음을 보여준다. 본 연구는 이 요인을 새롭게
-비교하기보다 모든 PT 조건에 동일한 Action 및 Trajectory sample과
-순서를 적용하여 초기 description의 효과와 분리한다. 최근의
-WebSTAR는 성공한 trajectory 내부의 step도 개별 채점하며, 전체
-97K step 대신 통과한 46K step에만 loss를 주었을 때 WebVoyager
-평균 성공률이 29.9에서 39.6으로 높아짐을 보였다
-\citep{he2026webstar}. 따라서 trajectory 개수만으로 supervision
-규모와 품질을 나타낼 수 없다. 최근의
-state-transition pretraining은 전후 화면으로 action을 복원하는
-inverse dynamics와 현재 화면ㆍaction에서 다음 화면을 예측하는
-forward dynamics를 함께 학습하고, 동일한 후속 trajectory 학습에서
-여러 GUI benchmark의 향상을 보고한다
-\citep{liu2026statetransition}. 이 연구는 실제 전후 화면 쌍을
-사용한다는 점에서, 현재 화면으로부터 예상 결과를 \emph{텍스트로}
-기술하는 본 연구의 supervision과는 구별된다.
-InfiGUIAgent는 GUI 이해ㆍgrounding을 학습하는 Stage 1과,
-trajectory에 계층적 reasoning 및 action 결과의 expectation--reflection을
-부여하는 Stage 2를 분리한다 \citep{liu2026infiguiagent}. Stage 1
-제거는 grounding을, Stage 2 제거는 multi-step success를 더 크게
-저하시킨다는 ablation은 중간 checkpoint에서 지각과 agent 성능을
-따로 추적해야 함을 보여준다. 다만 Stage 2에도 Stage 1과 유사한
-sample이 섞여 있어, 두 능력의 완전한 인과 분해로 볼 수는 없다.
-비영어 GUI를 다룬 AgentCPM-GUI는 12M grounding-aware PT 뒤에
-중국어 55K trajectory와 선별한 영어 trajectory를 함께 SFT하고
-중ㆍ영 benchmark를 모두 평가한다 \citep{zhang2025agentcpm}.
-그러나 언어별 단독 학습 대조군이 없어 bilingual mixture 자체의
-효과는 분리되지 않는다.
-UI-Hawk는 grounding, referring, screen QA, summarization을 먼저
-학습하고 이전 screenshot을 시각 history로 제공한 뒤 navigation을
-학습한다 \citep{zhang2025uihawk}. 동일한 후속 stage에서 시각
-history가 행동 텍스트만 사용한 조건보다 navigation에 유리하다는
-결과는 정적 화면 이해와 screen-stream 이해가 구별됨을 보여준다.
-
-후속 언어 supervision이 좌표 예측에 항상 이로운 것도 아니다.
-GUI-Libra는 긴 CoT SFT에서 response length와 grounding accuracy의
-음의 관계를 관찰하고, direct-action sample과 action/coordinate
-token reweighting으로 이를 완화한다 \citep{yang2026guilibra}.
-GUI-G1도 GUI grounding RL에서 긴 reasoning chain의 저하를
-관찰한다 \citep{zhou2025guig1}.
-CoT와 화면 description은 서로 다른 개입이지만, 이 결과는 웹
-understanding과 grounding을 분리해 측정하고 후속 stage까지
-추적해야 함을 뒷받침한다. 본 연구는 grounding data와
-ITㆍActionㆍTrajectory samples를 조건 간 고정한 채 PT description의
-상세도만 바꾸고, PT 직후부터 최종 trajectory model까지 동일한
-평가축을 적용한다.
+후속 trajectory의 품질도 최종 점수를 크게 바꾼다. WebSTAR는
+성공한 trajectory 안의 step을 다시 채점해, 97K 전체 step보다
+선별한 46K step을 학습한 모델이 더 높은 성공률을 보임을
+보고했다 \citep{he2026webstar}. 또한 실제 전후 화면으로
+forward/inverse dynamics를 학습하는 방법은 상태 변화 supervision의
+효용을 보이지만 \citep{liu2026statetransition}, 본 연구의 현재
+화면에 대한 텍스트 기반 예상 결과와는 다르다. 이에 우리는 모든
+조건에 동일한 IT, Action, Trajectory sample과 loss mask를 적용하고,
+각 단계의 변화량을 보고하여 초기 description의 효과와 후속
+학습의 효과를 분리한다.
