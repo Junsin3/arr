@@ -37,7 +37,13 @@ WebSRC는 웹 질의응답이 텍스트 의미뿐 아니라 페이지 구조의 
 포괄적 webpage caption이 포함되며, 과제 유형별 ablation은 caption
 supervision이 VisualWebBench와 DocVQA에 기여함을 보인다
 \citep{liu2025multiui}. 그러나 동일 화면에서 description
-granularity를 통제하지는 않는다.
+granularity를 통제하지는 않는다. GUICourse는 10M개 웹 화면의
+모든 텍스트, 좌표, 레이아웃 순서를 하나의 장문 target으로
+예측하도록 사전학습하고, 그 데이터량을 늘릴수록 OCR, text-to-box,
+단일 단계 웹 navigation 점수가 함께 증가함을 보였다
+\citep{chen2025guicourse}. 그러나 이 결과 역시 장문 target의
+\emph{구성}과 데이터 규모를 분리하지 않으므로, 동일 화면에서
+Short와 Long을 맞춘 본 연구의 비교가 필요하다.
 
 \paragraph{GUI 그라운딩과 에이전트 학습.}
 SeeClick은 GUI grounding continual pre-training 뒤에 downstream

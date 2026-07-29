@@ -73,7 +73,11 @@ benchmark가 아니라 영어 원본과 sample을 맞춘 secondary diagnostic으
 accuracy로 비웹 텍스트 밀집 시각 이해 전이를 측정한다. 최종
 trajectory 모델의 주요 에이전트 평가는 Multimodal-Mind2Web이며
 cross-task, cross-website, cross-domain 분할을 각각 보고한다.
-좌표 출력은 모든 평가에서 0--999 규약으로 해석한다.
+좌표 출력은 모든 평가에서 0--999 규약으로 해석한다. 동일한 요소도
+시각 속성이나 공간 관계를 달리 표현한 instruction에 따라 grounding
+결과가 달라질 수 있으므로 \citep{jandial2026grounders}, 가능한
+평가 subset에서는 동일 target의 표현 변형을 묶어 평균 정확도와
+변형 간 일관성을 함께 보고한다.
 
 \subsection{주요 결과 (진행 중)}
 

@@ -798,3 +798,17 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 - 동일한 2K AgentNet Win&Mac trajectory 후속 학습 조건에서 AgentNetBench, AndroidControl, GUIOdyssey 향상 및 transition data 규모에 따른 scaling을 보고한다.
 - 우리 연구와의 차이: 이 논문은 실제 visual state pair를 사용하지만 우리는 현재 화면/AX tree에서 합성한 텍스트 expected outcome을 사용한다. 따라서 직접적인 입증이 아니라 mechanism의 동기다.
 - 분석 우선순위: `Long-full` 대 `Long w/o transition/affordance`를 최우선 causal ablation으로 둔다. 그 다음 `Long w/o element details`, embedding distance probe, 한국어 paired diagnostic 순이다.
+### GUICourse (Chen et al., 2025)
+
+- ACL 2025 long paper. GUIEnv-global은 C4에서 렌더링한 웹 화면 10M개이며, 각 target은 화면의 모든 기술 가능한 텍스트, grounding 정보, layout sequence를 포함하는 long text다.
+- GUIEnv-local은 text2bbox/bbox2text 0.7M, GUIAct는 단일/다단계 action, GUIChat은 GUI 지식 QA를 담당한다. 즉 perception PT → GUI/action SFT의 multi-stage recipe다.
+- GUIEnv-global 규모를 0에서 2.5M 이상으로 늘릴 때 OCR, grounding, web-single navigation이 함께 상승한다. action type EM은 위치와 무관하여 거의 변하지 않는다.
+- 중요한 한계: long target 자체의 효과와 데이터 규모가 분리되지 않았고 Short target 대조군도 없다. “상세한 GUI PT가 쓰인다”는 선행 근거이지 “Long이 Short보다 낫다”는 증거는 아니다.
+- 원고 적용: 우리 matched Short/Long 설계의 필요성과 stage별 OCR/grounding/agent 평가를 뒷받침한다.
+
+### Do GUI Grounders Truly Understand UI Elements? (Jandial et al., 2026)
+
+- Findings of EACL 2026. 동일 UI element를 시각 속성, 공간 관계 등 여러 유효한 instruction으로 지칭하는 GUI Grounding Sensitivity Benchmark를 제안한다.
+- 12개 모델이 같은 target의 표현 변화에 상당히 민감하며, 기존 단일 instruction 정확도가 실제 grounding 능력을 충분히 나타내지 못한다고 보고한다.
+- 생성 instruction은 frontier model도 hallucination하므로 별도 validation이 필요하다고 지적한다.
+- 원고 적용: 한국어 paired diagnostic과 description granularity 평가에서 단일 문구 정확도만 보고하지 말고, 가능하면 동일 target paraphrase별 평균과 consistency를 함께 보고한다.
