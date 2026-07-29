@@ -872,3 +872,14 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 - agent data로 fine-tuning된 open model은 functional grounding에 강하지만, frontier commercial model은 functionality captioning에서 우세하며 uncommon action의 transition logic은 모든 모델이 어렵다.
 - 우리 원고 적용 후보: Long-full과 transition/functionality 제거 모델을 FuncPred/AutoGUI-v2 계열 task에서 비교하면 왜 agent 성능이 달라지는지 직접 진단할 수 있다.
 - 주의: 아직 peer-reviewed publication이 확인되지 않은 최신 preprint다. main benchmark로 새로 넣기보다, 계산 여유가 있을 때 mechanism diagnostic 또는 appendix 분석 후보로 둔다.
+### Continual Instruction Tuning for Large Multimodal Models (He et al., 2026)
+
+- IEEE Transactions on Image Processing 2026, 35:2699--2713. DOI 10.1109/TIP.2026.3671616.
+- LMM을 시각--언어 과제에 순차 instruction-tune할 때 catastrophic forgetting이 여전히 발생함을 체계적으로 보인다.
+- multi-task joint instruction tuning은 forgetting을 완화하고, continual setting에서는 data replay와 model expansion이 효과적이다. task pair의 유사도에 따라 transfer/forgetting 양상도 달라진다.
+- GUI 전용 연구는 아니므로 MolmoWeb QA IT가 grounding을 반드시 지운다는 직접 증거는 아니다. 다만 “모든 PT 조건에 같은 IT를 썼으므로 PT 능력이 같은 비율로 보존된다”는 가정이 성립하지 않을 수 있다는 근거다.
+- 우리 분석 규칙:
+  - 각 모델에서 `ΔIT = score_after_IT - score_after_PT`를 benchmark/category별로 보고한다.
+  - Short--Long gap의 감소를 `PT가 무효`와 동일시하지 않고, 둘 중 어느 조건의 성능이 상승/하락했는지 분해한다.
+  - grounding 감소와 QA 상승이 동시에 나타나면 IT의 capability trade-off로 기술하고, 최종 Trajectory에서 회복되는지도 추적한다.
+  - 현재 recipe에는 PT replay가 없으므로 replay의 이점을 우리 결과처럼 서술하지 않는다.
