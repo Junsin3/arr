@@ -44,6 +44,12 @@ granularity를 통제하지는 않는다. GUICourse는 10M개 웹 화면의
 \citep{chen2025guicourse}. 그러나 이 결과 역시 장문 target의
 \emph{구성}과 데이터 규모를 분리하지 않으므로, 동일 화면에서
 Short와 Long을 맞춘 본 연구의 비교가 필요하다.
+AutoGUI는 전후 UI state에서 합성한 상세 기능 설명을 같은 규모의
+element HTML 및 축약 기능 설명과 비교하고, 25K 조건에서 기능 예측,
+MoTIF, ScreenSpot grounding 모두 상세 기능 설명이 우세함을
+보고한다 \citep{li2025autogui}. 이는 기능ㆍaffordance 정보의
+가능성을 직접 뒷받침하지만, 화면 전체 Long description과
+Short caption의 비교는 아니다.
 
 \paragraph{GUI 그라운딩과 에이전트 학습.}
 SeeClick은 GUI grounding continual pre-training 뒤에 downstream

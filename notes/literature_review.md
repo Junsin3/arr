@@ -608,6 +608,14 @@
 - LLM-aided rejection과 verification으로 invalid annotation을
   자동 제거하고 AutoGUI-704K를 구축한다. 사람 평가에서 훈련된
   human annotator와 유사한 annotation correctness를 보고한다.
+- 동일한 25K 규모에서 full functionality annotation은 FuncPred
+  21.1, MoTIF 22.5, ScreenSpot 16.4를 기록하며 element HTML
+  (5.3/11.7/5.7)과 condensed functionality
+  (3.8/19.8/4.8)보다 모두 높다. 이는 규모를 맞춘 annotation
+  type 비교이므로 기능 상세도의 직접 근거다.
+- 다만 target은 개별 element functionality이며 화면 전체의
+  Short/Long caption을 비교하지 않는다. 따라서 우리 가설 전체의
+  선행 답이 아니라 `w/o function/affordance` ablation의 근거다.
 - 우리 논문에 쓸 수 있는 근거:
   - element의 예상 결과와 affordance는 정적 screenshot에서 임의로
     상상하기보다 구조화된 근거 또는 state transition에 결부해야 한다.
@@ -618,6 +626,9 @@
     결과는 accessibility tree와 현재 화면을 바탕으로 teacher가
     생성한다. 따라서 `expected result`를 관찰된 사실과 구분하고,
     가능하면 별도의 transition ablation을 두어야 한다.
+  - 우선순위는 (1) `Long w/o transition/outcome`, (2) `Long w/o
+    function/affordance`, (3) `Long w/o element detail`이다. 첫 둘은
+    각각 동적 예측과 정적 기능 의미를 분리한다.
 
 ### GUI-HalluBench (Zhang et al., 2026)
 
@@ -828,3 +839,10 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 - RFT ablation은 어려운 long-horizon benchmark에는 이득이 있지만 AndroidControl-High와 CAGUI에서는 SFT와 같거나 소폭 낮다. 후속 stage의 이득이 모든 분포에서 단조롭지 않다는 근거다.
 - 중요한 한계: Chinese-only, English-only, bilingual mixture 대조가 없다. 따라서 cross-lingual 평가 성공은 multilingual recipe의 선례지만 언어 혼합의 인과 효과를 입증하지 않는다.
 - 우리 원고 적용: Long bilingual 2.6M의 한국어 성능을 보고하되 영어 혼합의 효과로 단정하지 않는다. 언어별 matched PT 또는 동일 화면의 EN/KO paired evaluation이 필요하다.
+### AutoGUI-v2 (Li et al., 2026)
+
+- 2026-04 arXiv preprint(2604.24441). 6개 OS의 2,753 tasks로 region/element semantics, functional grounding, interaction outcome prediction을 평가한다.
+- 정적 위치 일치와 최종 task success 사이에 빠져 있던 “이 요소가 무엇을 하고, interaction 뒤 어떤 상태가 되는가”를 별도 평가축으로 만든다.
+- agent data로 fine-tuning된 open model은 functional grounding에 강하지만, frontier commercial model은 functionality captioning에서 우세하며 uncommon action의 transition logic은 모든 모델이 어렵다.
+- 우리 원고 적용 후보: Long-full과 transition/functionality 제거 모델을 FuncPred/AutoGUI-v2 계열 task에서 비교하면 왜 agent 성능이 달라지는지 직접 진단할 수 있다.
+- 주의: 아직 peer-reviewed publication이 확인되지 않은 최신 preprint다. main benchmark로 새로 넣기보다, 계산 여유가 있을 때 mechanism diagnostic 또는 appendix 분석 후보로 둔다.
