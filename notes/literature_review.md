@@ -490,6 +490,66 @@
   - online RL과 modular inference가 핵심이며, 본 연구는 동일한
     online interaction evaluation을 수행하지 않는다.
 
+### MPR-GUI (Chen et al., 2025)
+
+- 논문: https://arxiv.org/abs/2512.00756
+- 동일한 평가 설정을 영어, 중국어, 프랑스어, 러시아어, 일본어,
+  티그리냐어, 아랍어의 일곱 언어로 확장한 fine-grained GUI
+  perception/reasoning benchmark다. 한국어는 포함하지 않는다.
+- GPT-4o와 사람 검수를 결합해 multilingual VQA를 구축하며, widget
+  function과 element spatial relation을 세부 능력으로 분리한다.
+- 일곱 baseline의 평균 fine-grained accuracy는 영어 75.3%,
+  비영어 67.7%로 차이가 난다. hidden-state intervention인 GUI-XLI는
+  비영어 성능을 평균 6.5% 개선한다고 보고한다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 영어 GUI 성능을 한국어 능력의 대리값으로 둘 수 없으며, 언어별
+    paired evaluation이 필요하다.
+  - 번역 subset에서도 perception과 reasoning/grounding을 분리해
+    보고해야 한다.
+- 주의:
+  - mobile GUI 중심이고 한국어가 없으므로 우리의 한국어 평가를
+    표준 benchmark라고 부를 수 없다.
+
+### X-WebAgentBench (Peng et al., 2025)
+
+- 논문: https://aclanthology.org/2025.findings-acl.988/
+- WebShop 기반 interactive environment를 14개 언어로 확장하고,
+  언어별 200개씩 총 2,800 instruction과 약 590K multilingual
+  products를 제공한다. 한국어는 포함하지 않는다.
+- local-language input, 외부 영어 번역, self-translation,
+  cross-lingual prompting을 비교한다. 8B 이하 모델에서는 외부
+  영어 번역이 효과적인 반면 self-alignment는 제한적이라고 보고한다.
+- 비영어 환경에서 불필요한 action 수와 token cost가 언어별로
+  달라지고, 긴 interaction에서 성능 저하가 더 일찍 나타난다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 한국어 model 평가는 답변 정확도뿐 아니라 action 수 또는
+    trajectory 길이도 함께 보면 cross-lingual failure를 더 잘
+    진단할 수 있다.
+  - 영어 원본과 한국어 번역본을 paired하게 유지해야 언어 효과와
+    task 난이도를 분리할 수 있다.
+- 주의:
+  - screenshot 기반 GUI grounding이 아니라 text-centric WebShop
+    agent benchmark다.
+
+### K-BrowseComp (Lee et al., 2026)
+
+- 논문: https://arxiv.org/abs/2606.02404
+- 한국 문화ㆍ웹 맥락에 grounded된 400개 browsing problem을
+  구축한다. 그중 300개 verified split은 한국어 원어민이 직접
+  작성하고 검증하며, 100개 synthetic diagnostic split은 별도로
+  보고한다.
+- frontier model도 verified split에서 30.00--45.67%에 그쳐
+  한국어 agentic evaluation의 난이도와 영어 benchmark 성능의
+  제한된 전이를 보여준다.
+- 우리 논문에 쓸 수 있는 근거:
+  - 한국어 agent benchmark가 부족하다는 문제 제기의 직접 근거.
+  - 사람이 검증한 주 split과 합성 diagnostic split을 분리해
+    보고하는 관행은 우리의 translated subset을 표준 영어 결과와
+    분리하는 설계에 참고할 수 있다.
+- 주의:
+  - visual GUI understanding/grounding이 아니라 정보 검색형 browsing
+    benchmark이므로 직접 평가 대체재가 아니다.
+
 ## 현재까지의 핵심 공백
 
 검토한 주요 레시피들은 다음 중 하나 이상을 보여준다.
@@ -569,6 +629,16 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
    post-training functions."
    후보 인용: Aguvis; ScaleTrack; OpAgent; GUI-Libra.
 
+10. "English GUI performance does not reliably represent non-English
+    perception and agent behavior."
+    후보 인용: MPR-GUI; X-WebAgentBench.
+
+11. "A translated Korean subset should be reported as a paired diagnostic,
+    not presented as a new standard benchmark."
+    근거: MPR-GUI와 X-WebAgentBench에는 한국어가 없고,
+    K-BrowseComp는 native Korean benchmark지만 visual GUI 과제가
+    아니다. 방법론적 선택이므로 번역ㆍ검수 절차도 함께 명시할 것.
+
 ## 원고 위치별 인용 후보
 
 | 원고 위치 | 안전하게 지지되는 주장 | 후보 인용 |
@@ -580,6 +650,7 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 | Method | downstream data와 순서를 고정해야 초기 supervision의 효과를 분리할 수 있다. | ShowUI; MolmoWeb; UI-TARS |
 | Method | trajectory 조건에서는 action vocabulary와 sample/filtering을 조건 간 고정해야 한다. | AgentTrek; MolmoWeb |
 | Evaluation | understanding, grounding, agent execution은 분리해 측정해야 한다. | VisualWebBench; SeeClick; Mind2Web |
+| Evaluation | 한국어 subset은 영어 원본과 paired하게 평가하고 별도 diagnostic으로 보고한다. | MPR-GUI; X-WebAgentBench; K-BrowseComp |
 | Discussion | 더 풍부한 언어 supervision의 효과는 능력별로 단조롭지 않을 수 있다. | GUI-Libra; GUI-G1; LoTLIP; MultiUI task ablation |
 | Discussion | Long의 효과는 길이뿐 아니라 grounding, teacher 품질, 데이터 다양성에 의존한다. | Long Story Short; ShareGPT4V; KnowAda |
 
