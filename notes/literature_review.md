@@ -812,3 +812,11 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
 - 12개 모델이 같은 target의 표현 변화에 상당히 민감하며, 기존 단일 instruction 정확도가 실제 grounding 능력을 충분히 나타내지 못한다고 보고한다.
 - 생성 instruction은 frontier model도 hallucination하므로 별도 validation이 필요하다고 지적한다.
 - 원고 적용: 한국어 paired diagnostic과 description granularity 평가에서 단일 문구 정확도만 보고하지 말고, 가능하면 동일 target paraphrase별 평균과 consistency를 함께 보고한다.
+### InfiGUIAgent (Liu et al., 2026)
+
+- EACL 2026 long paper. 2-stage SFT로 Stage 1은 GUI understanding, grounding, QA와 일반 능력을, Stage 2는 trajectory 기반 hierarchical reasoning 및 expectation--reflection을 학습한다.
+- Stage 1은 총 1M samples, Stage 2는 45K synthesized samples다. Stage 2에서는 현재 관측과 action으로 다음 state description을 예측하는 auxiliary task도 포함한다.
+- Full: ScreenSpot 76.8 / AndroidWorld SR 0.13. w/o Stage 2: 76.0 / 0.00, w/o Stage 1: 74.3 / 0.09, w/o structured reasoning: 76.6 / 0.09.
+- 해석: Stage 1은 grounding, Stage 2는 multi-step success에 더 직접적으로 연결된다. 그러나 Stage 2에 30K `Stage 1-aligned` samples가 포함되어 완전한 factor isolation은 아니다.
+- 우리 원고 적용: PT→IT→Action→Trajectory의 모든 checkpoint를 평가해야 하는 직접 근거다. Long의 expected post-click outcome 효과가 PT 직후보다 Trajectory 이후 커지는지 보는 interaction 분석을 정당화한다.
+- causal claim 조건: `Long-full` 대 `Long w/o transition/affordance`가 있어야 textual expectation의 기여를 말할 수 있다. stage별 상관만으로 mechanism을 확정하지 않는다.
