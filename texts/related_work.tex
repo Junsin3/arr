@@ -13,6 +13,12 @@ LLaVA는 시각 인코더와 언어모델을 projection으로 연결하고 합�
 이를 완화한다 \citep{he2026continual}. 이는 동일한 IT를 적용하는
 것만으로 서로 다른 PT 능력이 같은 비율로 보존된다고 가정할 수
 없음을 뜻한다.
+Vision-Flan은 187개 시각 task의 human-labeled instruction을 먼저
+학습한 뒤 합성 대화 데이터를 적용하는 순서가 단일 혼합보다
+우수하며, 소량의 GPT-4 합성 데이터도 주로 응답 형식을 정렬할 수
+있음을 보였다 \citep{xu2024visionflan}. 따라서 IT의 예제 수만으로
+능력 획득을 설명하기보다 task coverage와 source별 역할을 함께
+보고해야 한다.
 
 \paragraph{설명 supervision의 상세도.}
 범용 시각--언어 학습에서는 caption이 객체뿐 아니라 속성, 관계,

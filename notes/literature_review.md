@@ -883,3 +883,24 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
   - Short--Long gap의 감소를 `PT가 무효`와 동일시하지 않고, 둘 중 어느 조건의 성능이 상승/하락했는지 분해한다.
   - grounding 감소와 QA 상승이 동시에 나타나면 IT의 capability trade-off로 기술하고, 최종 Trajectory에서 회복되는지도 추적한다.
   - 현재 recipe에는 PT replay가 없으므로 replay의 이점을 우리 결과처럼 서술하지 않는다.
+### Vision-Flan (Xu et al., 2024)
+
+- Findings of ACL 2024. 187개 human-labeled visual task, 1,664,261 instances로 task diversity를 확장한다.
+- Vision-Flan을 먼저 학습하고 GPT-4 synthetic data를 나중에 적용하는 2-stage IT가 단일-stage mixture보다 전반적으로 우수하다.
+- 분석상 GPT-4 synthetic data는 새로운 시각 능력을 크게 더하기보다 human-preferred response format을 조정하며, 약 1K만으로도 형식 정렬 효과가 나타난다.
+- 우리 원고 적용: MolmoWeb QA 70K와 filtered LLaVA-NeXT 30K를 단순 100K로만 소개하지 말고 source별 task category, answer length, action/coordinate 포함 여부, screenshot 의존성을 보고해야 한다.
+- 결과 해석: IT 후 형식 정확도만 오르고 웹 이해/grounding이 그대로라면 capability acquisition보다 output alignment로 기술한다.
+
+### PreSel (Safaei et al., 2025)
+
+- CVPR 2025. instruction을 생성하기 전에 task별 budget과 image-feature clustering으로 대표 이미지를 고르는 Pre-Instruction Data Selection을 제안한다.
+- 전체 이미지의 15%에만 instruction을 생성해도 LLaVA-1.5와 Vision-Flan에서 full-data VIT와 유사한 성능을 보고한다.
+- 우리 원고 적용: IT 성능을 100K라는 규모로만 설명할 수 없고 source/task/image diversity가 필요하다는 보조 근거다.
+- 직접 적용 후보: MolmoWeb 70K와 LLaVA-NeXT 30K 각각에서 URL/domain, screenshot perceptual hash, task template 중복률을 보고한다. 다만 현재 selection을 PreSel로 수행하지 않았으므로 그 방법을 사용했다고 서술하지 않는다.
+
+### MAGIC (Biswas and Roy, 2026)
+
+- 2026-05 arXiv preprint. Multimodal Gain(이미지 제공 시 정답 likelihood 증가), answer-token과 visual-token의 Bridging Relevance, skill-neuron signature로 IT coreset을 선택한다.
+- matched 20% budget에서 LLaVA-665K full tuning의 100.3%, Vision-Flan-186K의 101.6% 상대 성능을 보고한다.
+- 아직 peer-reviewed 여부가 확인되지 않았으므로 본문 핵심 근거보다 IT audit 아이디어로 둔다.
+- 우리 데이터 audit 후보: 이미지 원본과 blank/셔플 이미지를 넣었을 때 answer NLL 차이를 visual-dependency score로 계산한다. 점수가 낮은 QA 비율을 source별로 보고하면 70K/30K mixture의 실질적 시각 신호를 설명할 수 있다.
