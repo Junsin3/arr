@@ -987,3 +987,16 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
   - source별 trajectory 수, 총/중앙 step 길이, 성공 판정 방식, invalid/suboptimal step 제거율 또는 loss-mask 비율을 표에 추가한다.
   - 모든 PT 조건에 같은 trajectory ID만 맞추는 데서 그치지 않고, step order, mask, loss-token count도 동일함을 확인한다.
   - 최종 agent 차이가 생기면 PT 직후/IT 직후 grounding 변화와 trajectory 단계의 `after - before` 변화량을 함께 제시해 후속 noisy SFT의 영향을 분리한다.
+
+### FineState-Bench: Benchmarking State-Conditioned Grounding for Fine-grained GUI State Setting (Ji et al., 2026)
+
+- Findings of ACL 2026. 2,209개 instance, desktop/web/mobile, 4 interaction families, 23 UI component types로 구성한다.
+- final success 하나 대신 `SR@Loc`(올바른 control localization), `SR@Int`(올바른 interaction), `ES-SR@Loc`(localization 단계에서 exact state), `ES-SR@Int`(실제 interaction 뒤 exact state)의 네 단계 지표를 제안한다.
+- 전체 플랫폼에서 최고 ES-SR@Int는 평균 22.8%, Web에서는 32.8%다. 단순히 target element를 찾는 것과 정확한 상태를 만드는 것은 큰 차이가 있다.
+- Visual Diagnostic Assistant가 description과 bounding-box localization hint를 제공하는 통제 비교에서 Gemini-2.5-Flash의 ES-SR@Int가 +14.9%p 상승한다. 이는 visual grounding이 큰 병목임을 보이지만, hint 이후에도 실패가 남으므로 충분조건은 아니다.
+- 우리 원고 적용:
+  - agent error를 `target semantics → localization → action type/argument → resulting state → replanning`으로 분해한다.
+  - Short/Long의 ScreenSpot 또는 WebClick 향상만으로 trajectory 성공 향상을 예측하지 않고 category별 paired association을 보고한다.
+  - grounding 상승/agent 불변이면 planning·recovery 병목, grounding 불변/agent 상승이면 affordance·transition supervision 가능성을 우선 검토한다.
+  - 가능하면 action 2K 직후에는 single-step interaction, trajectory 100K 직후에는 exact-state/task success를 따로 측정한다.
+- 이전 arXiv:2508.09241 버전은 2,257개로 보고했지만, 최종 ACL 2026판은 2,209개다. 원고에는 최종판 수치만 사용한다.

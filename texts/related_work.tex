@@ -94,6 +94,12 @@ description과 dense caption을 포함한 GUI 지각 데이터, 통합 행동
 더 느리게 증가한다 \citep{li2024datascale}. 따라서 규모가 다른
 recipe의 최종 성능 차이를 description 상세도의 효과로만 해석할 수
 없다.
+FineState-Bench는 GUI 실행을 element localization, interaction,
+exact target-state 도달로 나누고, localization hint를 주는 통제
+조건에서도 남는 오류를 측정한다 \citep{ji2026finestate}. 시각
+위치 힌트가 exact-state 성공을 크게 높이지만 오류를 모두 없애지는
+못한 결과는 grounding이 agent 성공의 중요한 병목이면서 충분조건은
+아님을 보여준다.
 
 Trajectory 학습에서는 데이터의 양뿐 아니라 생성 및 검증 방식도
 중요하다. AgentTrek은 웹 tutorial을 실제 환경에서 guided replay한
