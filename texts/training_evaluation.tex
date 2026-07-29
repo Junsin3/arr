@@ -20,7 +20,10 @@ checkpoint에는 동일한 2K Action
 trajectory 예제를 학습한다. 순차 관측과 grounded action을 함께
 포함하는 trajectory의 구성 및 filtering이 agent 학습에 영향을
 줄 수 있으므로 \citep{xu2025agenttrek,gupta2026molmoweb}, 모든
-경로에서 sample ID와 순서를 고정한다. 행동 공간은 \texttt{click},
+경로에서 sample ID와 순서를 고정한다. 성공 trajectory에도
+부정확한 중간 step이 남을 수 있으므로 \citep{he2026webstar},
+trajectory 수와 함께 총 supervised step 수, 길이 분포, 성공 검증
+방법, 제거 또는 loss masking된 step 비율을 보고한다. 행동 공간은 \texttt{click},
 \texttt{type}, \texttt{press}, \texttt{scroll}, \texttt{goto},
 \texttt{go\_back}, \texttt{finish}의 일곱 가지로 통일한다.
 

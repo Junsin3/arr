@@ -973,3 +973,17 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
   - PT 직후뿐 아니라 공통 IT 직후를 평가하고 `IT 후 - PT 직후` 변화량을 조건별로 보고한다.
   - MolmoWeb QA와 LLaVA-NeXT 각각의 context 구조, image 사용 여부, completion-loss mask를 명시한다.
   - Long description은 전체 평균 factuality 외에 문장/atomic-fact 위치별 정확도를 나눠, 뒤쪽 세부사항이 hallucination으로 채워지는지 확인한다.
+
+### WebSTAR: Scalable Data Synthesis for Computer Use Agents with Step-Level Filtering (He et al., 2026)
+
+- ACL 2026 long paper. OpenAI computer-use-preview의 21K raw trajectories를 trajectory-level success로 먼저 거른 뒤 13,338개를 남기고, 각 action을 0--10점으로 다시 채점한다. 최종 WebSTAR는 13.3K trajectories와 267K graded steps다.
+- 가장 직접적인 matched comparison: 성공 trajectory의 전체 97K steps를 SFT하면 WebVoyager 평균 29.9지만, 그 안에서 cutoff를 통과한 46K steps에만 loss를 주면 39.6이다. 데이터가 절반인데 +9.7%p 높다.
+- incorrect step을 history에서 삭제하지 않고 conditioning context에는 남기되 그 step의 loss만 mask한다. 따라서 단순 trajectory 삭제와 step-level loss masking은 다른 개입이다.
+- grading cutoff를 바꿀 때 final dataset을 모두 100K steps로 맞춘 실험에서 cutoff 2/4/5/6/8의 WebVoyager Pass@1은 29.7/40.2/43.3/41.3/42.5다. 높은 cutoff가 항상 우수하지 않고, 필요한 raw rollout 양도 늘어난다.
+- grader와 인간의 이진 판정 일치율은 100개 표본에서 73%다. 자동 grader 점수를 ground truth로 간주해서는 안 되며, 표본 수동 검증과 threshold sensitivity를 보고해야 한다.
+- reasoning augmentation은 Pass@1을 일관되게 높이지 않지만 Pass@4를 대체로 개선한다. trajectory 품질, reasoning 존재, sampling budget을 한 효과로 묶으면 안 된다.
+- 우리 원고 적용:
+  - “Trajectory 100K”를 trajectory 100K인지 step 100K인지 명확히 적고, 총 supervised target 수와 token 수를 함께 보고한다.
+  - source별 trajectory 수, 총/중앙 step 길이, 성공 판정 방식, invalid/suboptimal step 제거율 또는 loss-mask 비율을 표에 추가한다.
+  - 모든 PT 조건에 같은 trajectory ID만 맞추는 데서 그치지 않고, step order, mask, loss-token count도 동일함을 확인한다.
+  - 최종 agent 차이가 생기면 PT 직후/IT 직후 grounding 변화와 trajectory 단계의 `after - before` 변화량을 함께 제시해 후속 noisy SFT의 영향을 분리한다.
