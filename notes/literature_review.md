@@ -1081,3 +1081,68 @@ element grounding이 주로 개선된 결과라면 `w/o element details`가
   - EMPO는 RL 연구이며 본 연구의 100K trajectory SFT와 학습
     objective가 다르다. 직접 baseline보다 trajectory evaluation의
     한계를 설명하는 인용 후보로 적합하다.
+
+### DreamLIP: Language-Image Pre-training with Long Captions (Zheng et al., 2024)
+
+- 최종 논문: ECCV 2024,
+  https://www.ecva.net/papers/eccv_2024/papers_ECCV/html/2666_ECCV_2024_paper.php
+- 같은 이미지에 MLLM prompt를 달리 적용해 Short와 Long caption을
+  생성한다. 원래 caption과 Short, Long을 문장 단위 sub-caption으로
+  나눈 뒤 여러 positive text로 sampling하고, 각 sub-caption을
+  관련 image patch에 연결하는 grouping loss를 사용한다.
+- Table 6의 동일 설정 ablation에서 raw-caption CLIP보다 Short와
+  Long 모두 개선되지만, Long을 한 덩어리로 직접 사용한 조건과
+  Short 조건의 성능은 비슷하다. Long의 sub-caption을 sampling하면
+  여섯 평가 지표가 모두 더 좋아지고, Short를 함께 사용하면 다시
+  향상된다. 즉 Long에 정보가 많다는 사실만으로 그 정보가
+  optimization에서 효과적으로 쓰인다고 볼 수 없다.
+- sampled sub-caption 수를 3에서 늘릴수록 대체로 좋아지지만 약
+  8개 이후에는 포화되거나 지표별 변동이 생긴다. 논문은 추가
+  sub-caption의 중복을 원인 후보로 제시한다.
+- 우리 연구에 쓸 수 있는 근거:
+  - Long 전체 target의 평균 성능뿐 아니라 문장 또는 atomic-fact
+    위치별 loss와 정확도를 확인해야 한다.
+  - Long이 Short보다 나쁘더라도 ``세부 정보가 무용하다''고 바로
+    결론 내릴 수 없다. long target 내 supervision dilution이나
+    뒤쪽 token 학습 약화가 가능한 대안 설명이다.
+  - 후속 실험으로 Long의 atomic facts를 개별 QA/description
+    sample로 분해하는 조건, 또는 핵심 Short summary와 세부 facts를
+    함께 학습하는 조건을 고려할 수 있다.
+- 주의:
+  - contrastive CLIP과 별도 grouping loss를 사용하므로
+    autoregressive Qwen GUI PT에 성능 수치를 직접 이식할 수 없다.
+  - caption 생성 teacher와 최적화 방식이 함께 달라져, 순수한
+    length-only 비교도 아니다.
+
+### UltraCaption: Enhancing Large Vision-Language Models with Ultra-Detailed Image Caption Generation (Zeng et al., 2025)
+
+- 최종 논문: EMNLP 2025 long paper,
+  https://aclanthology.org/2025.emnlp-main.1357/
+- object location, OCR text, world knowledge를 결합하고 여덟 개
+  설명 차원에 관한 질문으로 초기 caption을 확장한다. 이후
+  sentence-level critic과 rewrite를 적용해 hallucination을
+  줄이는 파이프라인이다.
+- CompreCap 평가에서 caption 길이와 별도로 object coverage,
+  pixel coverage, object correctness, relation correctness를
+  보고한다. Qwen2-VL-7B baseline은 143.66 words,
+  object/pixel coverage 71.97/57.31이며, 최종 critic-rewrite
+  조건은 171.65 words, 75.96/63.19다. 그러나 human caption은 더
+  짧은 133.61 words이면서 object coverage가 77.62로 더 높다.
+  이는 길이와 coverage가 동일한 변수가 아님을 수치로 보여준다.
+- 최종 pipeline의 object/relation correctness는 2.84/2.77로
+  human의 2.78/2.99와 서로 다른 양상을 보인다. 더 포괄적인
+  caption도 특히 공간 관계의 정확성을 자동으로 보장하지 않는다.
+- 우리 연구에 쓸 수 있는 근거:
+  - Short/Long 데이터 기술에 tokenizer 길이만 두지 말고 Stage 1
+    fact 기준으로 visible-text, element, state, spatial relation,
+    function/affordance, expected-outcome coverage를 각각 보고한다.
+  - factual precision도 같은 축으로 계산한다. Long이 fact
+    coverage를 늘리는 동시에 unsupported fact를 늘릴 가능성을
+    분리해야 한다.
+  - 좌우 관계처럼 기준 좌표계가 모호한 항목은 독립 category로
+    검사하고, GUI에서는 viewport 기준의 left/right 정의를 prompt와
+    verifier에 명시한다.
+- 주의:
+  - 자연 이미지 caption pipeline이며 Short/Long PT의 matched
+    downstream 비교는 아니다. 우리 가설의 직접 증거가 아니라
+    데이터 품질 측정법과 validation 설계의 근거로 사용한다.
