@@ -490,11 +490,10 @@
   - online RL과 modular inference가 핵심이며, 본 연구는 동일한
     online interaction evaluation을 수행하지 않는다.
 
-### MPR-GUI (Chen et al., 2025)
+### MPR-GUI (Chen et al., 2026)
 
-- 논문: https://arxiv.org/abs/2512.00756
-- 동일한 평가 설정을 영어, 중국어, 프랑스어, 러시아어, 일본어,
-  티그리냐어, 아랍어의 일곱 언어로 확장한 fine-grained GUI
+- 최종 논문: ACL 2026 long paper, https://aclanthology.org/2026.acl-long.1375/ (초기 arXiv:2512.00756에서 서지와 데이터 구성이 갱신됨).
+- 동일한 GUI 평가 환경을 여섯 언어에 엄격히 정렬한 fine-grained
   perception/reasoning benchmark다. 한국어는 포함하지 않는다.
 - GPT-4o와 사람 검수를 결합해 multilingual VQA를 구축하며, widget
   function과 element spatial relation을 세부 능력으로 분리한다.
@@ -509,6 +508,8 @@
 - 주의:
   - mobile GUI 중심이고 한국어가 없으므로 우리의 한국어 평가를
     표준 benchmark라고 부를 수 없다.
+  - 초기 arXiv판의 일곱 언어 서술을 최종 ACL판에 그대로 인용하면
+    안 된다. 최종 초록과 본문은 여섯 언어로 보고한다.
 
 ### X-WebAgentBench (Peng et al., 2025)
 
