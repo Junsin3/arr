@@ -4,51 +4,35 @@
   font=\small,
   stage/.style={draw, rounded corners=2pt, align=center,
                 minimum width=20mm, minimum height=8mm},
-  skip/.style={draw, rounded corners=2pt, align=center,
-               minimum width=20mm, minimum height=8mm, dashed,
-               text=gray},
   arrow/.style={-{Latex[length=2mm]}, semithick},
   row/.style={font=\small\bfseries, anchor=east}
 ]
-\node[row] at (-0.5,0) {No PT};
-\node[row] at (-0.5,-1.05) {PT, no IT};
-\node[row] at (-0.5,-2.10) {Short};
-\node[row] at (-0.5,-3.15) {Long bilingual};
+\node[row] at (-0.3,0) {Grounding-only};
+\node[row] at (-0.3,-1.0) {Concise};
+\node[row] at (-0.3,-2.0) {Balanced};
+\node[row] at (-0.3,-3.0) {Comprehensive};
 
-\node[stage,fill=stagegray] (base0) at (1,0) {Base};
-\node[stage,fill=stagegray] (base1) at (1,-1.05) {Base};
-\node[stage,fill=stagegray] (base2) at (1,-2.10) {Base};
-\node[stage,fill=stagegray] (base3) at (1,-3.15) {Base};
+\foreach \r in {0,1,2,3}
+  \node[stage,fill=stagegray] (base\r) at (0.9,-\r) {Base};
 
-\node[skip]  (pt0) at (3.6,0) {PT};
-\node[stage,fill=stagegray] (it0) at (6.2,0) {IT};
-\node[stage,fill=stagegreen] (act0) at (8.8,0) {Action};
-\node[stage,fill=stagegreen] (traj0) at (11.4,0) {Trajectory};
-
-\node[stage,fill=longorange] (pt1) at (3.6,-1.05) {PT};
-\node[skip]  (it1) at (6.2,-1.05) {IT};
-\node[stage,fill=stagegreen] (act1) at (8.8,-1.05) {Action};
-\node[stage,fill=stagegreen] (traj1) at (11.4,-1.05) {Trajectory};
-
-\node[stage,fill=shortblue] (pt2) at (3.6,-2.10) {Short PT};
-\node[stage,fill=stagegray] (it2) at (6.2,-2.10) {IT};
-\node[stage,fill=stagegreen] (act2) at (8.8,-2.10) {Action};
-\node[stage,fill=stagegreen] (traj2) at (11.4,-2.10) {Trajectory};
-
-\node[stage,fill=longorange] (pt3) at (3.6,-3.15) {Long PT\\EN+KO};
-\node[stage,fill=stagegray] (it3) at (6.2,-3.15) {IT};
-\node[stage,fill=stagegreen] (act3) at (8.8,-3.15) {Action};
-\node[stage,fill=stagegreen] (traj3) at (11.4,-3.15) {Trajectory};
+\node[stage,fill=stagegray] (pt0) at (3.6,0) {Grounding PT};
+\node[stage,fill=shortblue] (pt1) at (3.6,-1) {Grounding\\+ Concise};
+\node[stage,fill=stagegreen] (pt2) at (3.6,-2) {Grounding\\+ Balanced};
+\node[stage,fill=longorange] (pt3) at (3.6,-3) {Grounding\\+ Comprehensive};
 
 \foreach \r in {0,1,2,3} {
+  \node[stage,fill=stagegray] (it\r) at (6.3,-\r) {IT};
+  \node[stage,fill=stagegray] (act\r) at (8.8,-\r) {Action};
+  \node[stage,fill=stagegray] (traj\r) at (11.5,-\r) {Trajectory};
   \draw[arrow] (base\r) -- (pt\r);
   \draw[arrow] (pt\r) -- (it\r);
   \draw[arrow] (it\r) -- (act\r);
   \draw[arrow] (act\r) -- (traj\r);
 }
 \end{tikzpicture}
-\caption{\textbf{실제로 준비한 네 학습 경로.} 점선 상자는 해당
-단계를 건너뜀을 뜻한다. 각 단계의 데이터 구성과 비교 목적은
-본문에서 설명한다.}
+\caption{\textbf{통제된 네 학습 경로.} PT의 description
+information budget만 달리하고, 이후 IT, Action, Trajectory의
+sample과 순서를 동일하게 유지한다. 각 단계의 checkpoint를 평가해
+초기 supervision의 효과와 지속성을 분리한다.}
 \label{fig:pipeline}
 \end{figure*}

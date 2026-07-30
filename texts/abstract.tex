@@ -1,23 +1,25 @@
 \begin{abstract}
-최근의 시각 기반 웹 에이전트는 화면 이해, 요소 그라운딩, 행동
-궤적을 서로 다른 데이터 혼합과 학습 단계로 습득한다. 기존
-레시피를 검토하는 과정에서 우리는 행동 학습 이전의 웹페이지
-설명이 모델마다 서로 다른 상세도로 구성되지만, 이 선택의 효과는
-다른 학습 요인과 분리되어 평가되지 않았다는 점에 주목하였다. 본
-연구는 같은 웹 화면을 핵심 정보만 남긴 Short description으로
-학습하는 것과 화면의 텍스트ㆍ상태ㆍ행동 요소를 포괄한 Long
-description으로 학습하는 것을 비교한다. 150K개 화면에서 공유된
-Stage 1 사실 레코드 148K개를 추출한 뒤, Stage 2에서 핵심 정보만
-선택하는 Short 설명과 가시 사실 및 affordance를 포괄하는 Long
-설명을 생성한다. 각 조건에는 동일한 1.2M
-그라운딩 예제를 혼합한다. 후속 단계에서는 동일한 100K 명령어
-데이터, 2K action adaptation 데이터, 100K 행동 궤적을 순차적으로
-학습한다.
-PT 직후, 명령어 튜닝 이후, action adaptation 이후, 행동 궤적 학습
-이후의 체크포인트를 함께 평가함으로써 서술 상세도의 효과가
-어디에서 나타나고 얼마나 유지되는지를 측정한다. 데이터 검증
-과정에서는 프롬프트의 금지 규칙에도 teacher가 약 3.2\%의 예제에서
-존재하지 않는 좌표를 생성함을 관찰했으며, 좌표 집합 대조를 통해
-이를 제거하였다. 이 통제 설계는 웹 GUI 사전학습에서 더 많은
-내용을 서술하는 것이 실제로 더 유용한 supervision인지 검증한다.
+웹 에이전트는 페이지 목적뿐 아니라 세부 텍스트, UI 상태, 요소
+관계, 기능과 행동 가능한 위치를 스크린샷에서 이해해야 한다.
+그러나 기존 웹 사전학습 recipe는 caption, QA, grounding과
+trajectory를 서로 다른 구성으로 혼합하여, 자연어 description이
+화면 evidence를 어느 정도까지 언어화해야 하는지는 명확하지 않다.
+본 연구는 간결한 caption의 한계를 사실 오류가 아니라 text-rich
+webpage에 대한 supervision under-coverage로 정의한다. 동일한
+150K개 화면에서 148K개의 Stage 1 구조화 evidence를 추출하고,
+이를 salient evidence를 선택하는 Concise, 주요 section의 대표
+evidence를 담는 Balanced, 거의 모든 가시 사실과 affordance를
+언어화하는 Comprehensive description으로 변환한다. 세 조건에는
+동일한 1.2M grounding 예제를 혼합하며, description이 없는
+Grounding-only 기준선을 함께 둔다.
+
+먼저 Stage 1을 기준으로 content, state, relation, function,
+affordance와 coordinate coverage 및 unsupported claim을 측정한다.
+이후 Concise에서 생략되고 더 포괄적인 조건에 포함된 검증 가능한
+정보로 omission-targeted diagnostic을 구성한다. 공개 웹 이해와
+grounding benchmark를 외적 타당성 평가로 사용하고, 동일한 100K
+IT, 2K Action, 100K Trajectory 학습 후에도 차이가 유지되는지
+checkpoint별로 추적한다. 이 설계는 긴 문장이 보편적으로 우수한지를
+가정하지 않고, 증가하는 information budget과 target-token 비용이
+웹 이해 및 후속 agent adaptation에 미치는 효과를 검증한다.
 \end{abstract}

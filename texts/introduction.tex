@@ -1,65 +1,78 @@
 \section{서론}
 
-웹 그래픽 사용자 인터페이스(GUI)를 조작하려면 화면의 밀집된
-텍스트를 읽고, 요소의 기능과 상태를 이해하며, 언어로 지시된
-대상을 정확한 위치에 연결해야 한다. 웹 질의응답에서도 텍스트
+웹 그래픽 사용자 인터페이스(GUI)를 조작하려면 화면의 전반적인
+목적뿐 아니라 밀집된 텍스트, 현재 상태와 값, 요소 간 관계, 기능과
+행동 가능한 위치를 함께 이해해야 한다. 웹 질의응답에서도 텍스트
 의미만으로는 충분하지 않고 페이지 구조가 필요하며
-\citep{chen2021websrc}, VisualWebBench는 현재 멀티모달 모델이
+\citep{chen2021websrc}, VisualWebBench는 멀티모달 모델이
 텍스트가 많은 웹 화면의 이해와 그라운딩에서 여전히 어려움을
 겪음을 보여준다 \citep{liu2024visualwebbench}.
 
 최근의 native GUI agent는 DOM이나 접근성 트리를 추론 시점의
 입력으로 사용하지 않고 스크린샷에서 직접 행동을 예측한다. 이를
-위해 화면 이해와 요소 그라운딩을 먼저 학습한 뒤 행동 궤적으로
-적응하거나, 이 데이터를 하나의 학습 mixture에 결합한다
+위해 화면 이해와 요소 그라운딩을 행동 학습 전에 익히거나, 이
+데이터를 trajectory와 하나의 mixture로 결합한다
 \citep{cheng2024seeclick,qin2025uitars,gupta2026molmoweb}. 그러나
-각 연구의 화면 supervision은 element description, screenshot QA,
-dense caption처럼 서로 다르고, 데이터 규모와 후속 학습도 함께
-변한다. 따라서 기존 결과만으로는 초기 화면 설명을 얼마나 자세히
-해야 하는지 판단하기 어렵다.
+기존 recipe는 caption, screenshot QA, grounding, affordance,
+trajectory의 구성과 규모가 서로 달라, 웹 pretraining을 위한
+자연어 description을 어떻게 구성해야 하는지는 명확하지 않다.
 
-우리는 이 문제를 실제 학습 데이터를 구축하는 과정에서 관찰했다.
-짧은 caption은 페이지의 목적과 핵심 상태에 신호를 집중하지만,
-작은 텍스트와 주변 요소의 관계를 생략한다. 반대로 긴 description은
-가시 텍스트, 상태, 요소의 기능과 예상 상호작용 결과를 폭넓게
-보존하지만, 중요도가 낮거나 이미지에서 확실히 확인하기 어려운
-내용까지 학습시킬 수 있다. 자연 이미지에서도 caption의
-image alignment와 속성ㆍ관계ㆍ상태의 coverage가 compositional
-representation에 영향을 주지만 \citep{doveh2023dac}, 길이 자체가
-정보 specificity를 보장하지는 않는다
-\citep{kapur2026morewords}. 따라서 본 연구의 질문은 단순히
-``긴 문장이 더 좋은가''가 아니라, \emph{동일한 웹 화면의 사실을
-더 포괄적으로 언어화한 supervision이 어떤 능력을 만들고 그 효과가
-후속 agent 학습까지 유지되는가}이다.
+본 연구는 기존의 간결한 caption이 부정확하다는 문제에서 출발하지
+않는다. 간결한 caption은 페이지 목적과 두드러진 내용을 효율적으로
+요약하지만, text-rich webpage에 존재하는 세부 문구와 값, 선택ㆍ
+비활성ㆍ열림 상태, section과 요소의 관계, 기능과 affordance를
+선택적으로 생략한다. 이 정보는 화면에 보이더라도 target에 나타나지
+않으면 language loss를 통해 명시적인 supervision으로 제공되지
+않는다. 자연 이미지에서도 caption의 alignment와 density는 서로
+다르며, 정확한 caption이라도 속성ㆍ상태ㆍ관계를 충분히 포함하지
+않으면 제한된 supervision이 될 수 있다 \citep{doveh2023dac}.
+동시에 길이 자체가 specificity나 coverage를 보장하지는 않는다
+\citep{kapur2026morewords}. 따라서 우리가 다루는 문제는
+\emph{caption 오류}가 아니라 \emph{웹 화면 evidence에 대한
+supervision under-coverage}이다.
 
 \input{figures/supervision_contrast}
 
-이를 검증하기 위해 동일한 스크린샷과 구조화된 화면 사실에서
-\textbf{간결한 설명(Short)}과 \textbf{포괄적 설명(Long)}을
-생성한다. 좌표 규약, 외부 그라운딩 데이터, 기반 모델과 후속
-데이터를 통제하고, 설명에 보존되는 정보의 범위만 다르게 한다.
-PT 직후에는 웹 이해와 그라운딩을 분리해 측정하고, 이후 동일한
-IT, Action, Trajectory 학습을 거치며 차이가 유지되는지 추적한다.
-또한 Long에서 요소 상세, 기능ㆍaffordance, 예상 화면 변화를
-제거하는 분석으로 관찰된 차이가 어느 정보에서 비롯되는지
-확인한다.
+이를 검증하기 위해 동일한 screenshot과 Stage 1 구조화 evidence에서
+세 가지 verbalization recipe를 만든다. \textbf{Concise}는 페이지
+목적, salient content와 핵심 interaction을 선택하고,
+\textbf{Balanced}는 각 주요 section의 대표 사실과 primary task
+flow 및 추가 interaction을 포함한다. \textbf{Comprehensive}는
+가시 사실, affordance, 좌표와 예상 interaction 결과를 거의 모두
+언어화한다. 이 조건들은 개별 sample에서 엄격한 집합 포함을
+강제하지 않으며, 점진적으로 큰 information budget과 높은 평균
+evidence coverage를 제공하는 실제 pretraining recipe다. 같은
+화면을 사용하더라도 target-token budget도 달라지므로 이를
+length-only 또는 token-matched 비교로 부르지 않는다.
 
-실제 준비된 대규모 recipe에는 영어 Short PT와 영어ㆍ한국어 Long
-PT가 포함되어 있어 언어와 데이터 규모가 완전히 일치하지 않는다.
-따라서 이 비교는 실제 recipe의 효용으로 보고하고, description
-상세도의 인과 효과는 화면ㆍ언어ㆍ그라운딩ㆍ후속 sample을 맞춘
-Short/Long subset에서 별도로 판단한다. 현재 최종 모델 평가가 진행
-중이므로 어느 조건의 우월성도 전제하지 않는다.
+효과를 세 층위에서 확인한다. 먼저 공유된 Stage 1의 atomic
+evidence를 기준으로 content, state, relation, function,
+affordance와 coordinate coverage 및 unsupported-claim rate를
+측정한다. 다음으로 Concise에서 생략되고 더 포괄적인 조건에
+포함된 검증 가능한 evidence를 질문으로 바꾼 omission-targeted
+diagnostic을 구축한다. 공개 benchmark는 외적 타당성을 위해
+사용하고, 자체 diagnostic은 어떤 정보 범주에서 차이가 생기는지
+분석하는 데 사용한다. 마지막으로 동일한 IT, Action, Trajectory
+학습을 적용하고 PT 직후부터 최종 agent까지 차이가 유지되는지
+추적한다. Grounding-only 조건을 함께 두어 description 자체가
+공통 grounding supervision 위에 주는 추가 효과를 측정한다.
+
+실제 준비된 영어ㆍ한국어 Comprehensive 대규모 recipe는 언어와
+데이터 규모가 통제 조건과 다르므로 별도의 실용적 결과로 보고한다.
+정보 포괄성의 효과는 동일 화면, 언어, grounding과 후속 sample을
+사용한 Concise--Balanced--Comprehensive 비교에서 판단한다. 현재
+최종 모델 평가가 진행 중이므로 어느 수준의 우월성이나 단조 증가를
+전제하지 않는다.
 
 본 연구의 기여는 다음과 같다.
 \begin{itemize}
-    \item 동일한 웹 화면 사실에서 생성한 Short/Long supervision을
-    비교하여 설명의 상세도와 데이터 규모ㆍ그라운딩 양을 분리하는
-    실험 설계를 제시한다.
-    \item PT, IT, Action, Trajectory checkpoint를 평가하여 초기
-    화면 supervision의 즉시 효과와 최종 agent까지의 지속 효과를
-    구분한다.
-    \item 접근성 트리에서 얻은 좌표를 teacher가 인용하게 하고
-    프로그램 검증으로 좌표 발명을 제거하는 2단계 데이터 합성
-    절차를 제시한다.
+    \item 웹 description pretraining의 문제를 길이 자체가 아니라
+    text-rich UI evidence에 대한 supervision coverage로 정의하고,
+    동일 evidence에서 세 정보 budget을 비교한다.
+    \item Stage 1 기반 coverage 분석과 omission-targeted
+    diagnostic으로 어떤 정보가 target에서 생략되고 어떤 능력
+    차이로 이어지는지 연결한다.
+    \item Grounding-only 기준선과 PT, IT, Action, Trajectory
+    checkpoint를 이용해 description의 추가 효과와 후속 agent
+    학습까지의 지속성을 구분한다.
 \end{itemize}

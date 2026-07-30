@@ -1,24 +1,31 @@
 \section{한계}
 \label{sec:limitations}
 
-첫째, 두 caption의 화면 집합은 완전히 일치하지 않는다. 좌표 검증
-과정에서 Short 예제가 4,870건 더 제거되었지만 전체 PT 행 수의
-차이는 0.35\%이다. 더 엄밀한 후속 실험에서는 공통으로 통과한 화면
-ID의 교집합만 사용해야 한다. 둘째, 현재 실험에서 설명 길이와 정보
-선택 효과를 분리할 수 없다. 셋째, 모든 합성 설명이 하나의
-teacher에서 생성되어 teacher 편향이 두 조건에 공통으로 존재한다.
-넷째, 학습은 1 epoch와 단일 seed로 수행되어 run 간 분산을 추정하지
-못한다. 다섯째, Traj 단계의 이미지 pixel 상한이 PT보다 낮고,
-\texttt{go\_back} 정답 예제가 없다. 여섯째, 공통 UGround 데이터의
-178개 좌표가 명목 범위를 벗어난다. 이는 조건 간 비교를 편향하지는
-않지만 절대 성능에는 영향을 줄 수 있다. 또한 GUI grounding
-정확도는 target의 상대 크기, 입력 해상도, explicit/implicit
-instruction에 민감하므로
-\citep{li2025screenspotpro,liu2025uie2i,jandial2026grounders},
-현재 benchmark의 종합
-점수만으로 모든 실제 UI 조건에 일반화할 수 없다. 마지막으로 단일 9B
-backbone의 결과가 다른 구조와 크기에 그대로 확장된다고 볼 수 없다.
-또한 약 2.6M 예제를 쓰는 Long bilingual recipe는 Short recipe와
-규모, 언어, 데이터 구성이 동시에 다르다. 이 비교는 실제 recipe
-효용만을 나타내며, description granularity의 인과 결론은 이러한
-요인을 맞춘 통제 실험으로 제한한다.
+첫째, Concise, Balanced, Comprehensive는 길이만 다른 target이
+아니다. information selection, expected outcome coverage,
+information ordering과 총 loss-token budget이 함께 달라지는 실제
+verbalization recipe다. 따라서 결과는 length-only 인과 효과가
+아니라 supervision completeness와 비용이 결합된 효과로 해석한다.
+둘째, 개별 sample에서 Concise evidence 집합이 Balanced의
+부분집합이 되도록 강제하지 않는다. 세 조건은 평균 coverage가
+증가하지만 strict dose--response 설계는 아니다. 셋째, 세 조건이
+공통으로 유효한 화면 교집합을 사용하므로 전체 구축 corpus와 통제
+실험의 규모가 다르다.
+
+넷째, 모든 합성 설명은 하나의 teacher와 Stage 1 evidence에
+의존한다. Stage 1에서 누락되거나 잘못 추출된 정보는 세 조건에
+공통으로 전파될 수 있으며, Stage 1 coverage는 screenshot 전체의
+완전한 ground truth가 아니다. 자동 coverage와 unsupported-claim
+판정도 사람 검수 표본과 일치도를 보고해야 한다. 다섯째, 학습은
+단일 backbone과 제한된 seed로 수행되어 run 간 분산을 충분히
+추정하지 못한다.
+
+공통 UGround 데이터에는 명목 좌표 범위를 벗어난 예제가 일부
+존재하며, trajectory의 이미지 pixel 상한도 PT와 다르다. 이는
+조건 간에는 공유되지만 절대 성능에는 영향을 줄 수 있다. GUI
+grounding 정확도는 target 크기, 입력 해상도와 instruction 표현에
+민감하므로 \citep{li2025screenspotpro,liu2025uie2i,jandial2026grounders},
+공개 benchmark의 종합 점수만으로 모든 실제 UI 조건에 일반화할 수
+없다. 마지막으로 약 2.6M 예제를 사용하는 영어ㆍ한국어
+Comprehensive recipe는 통제 실험과 규모와 언어가 다르며, 이 결과는
+실용적 효용으로만 보고한다.

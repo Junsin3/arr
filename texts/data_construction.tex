@@ -17,7 +17,7 @@ $\hat{y}$도 같은 방식으로 계산한다. 합성 모델은 계산된 좌표
 프롬프트로 전달받아 그대로 인용하며, 픽셀만 보고 좌표를 추정하지
 않는다.
 
-\subsection{2단계 설명 합성}
+\subsection{2단계 evidence 추출과 verbalization}
 
 Qwen3.5-397B-A17B teacher를 이용해 설명을 두 단계로 합성한다.
 \textbf{Stage 1: 구조화 사실 추출.} Stage 1은 스크린샷과 화면에
@@ -26,42 +26,63 @@ Qwen3.5-397B-A17B teacher를 이용해 설명을 두 단계로 합성한다.
 구조화한다. 각 affordance는 이름, 행동 유형, 예상 결과, 좌표를
 포함한다. 접근성 트리는 웹 UI의 시각ㆍ텍스트 요소를 합성
 supervision으로 변환하는 구조화 근거로 활용되어 왔다
-\citep{liu2025multiui}. 총 148K개의 유효한 사실 레코드를 얻었으며 두 설명
-조건 모두 이 파일을 공유한다. 따라서 조건 간 차이는 teacher가
+\citep{liu2025multiui}. 총 148K개의 유효한 사실 레코드를 얻었으며
+세 설명 조건 모두 이 파일을 공유한다. 따라서 조건 간 차이는 teacher가
 서로 다른 사실을 추출했기 때문이 아니라, 같은 사실을 어떤
-상세도로 언어화했기 때문에 발생한다.
+정보 budget으로 언어화했기 때문에 발생한다.
 
-\textbf{Stage 2: 상세도별 설명 생성.} Stage 2는 같은 스크린샷과
-Stage 1 출력을 입력받아 Short 또는 Long 설명을 생성한다. 이처럼
+\textbf{Stage 2: 포괄성 수준별 설명 생성.} Stage 2는 같은
+스크린샷과 Stage 1 출력을 입력받아 Concise, Balanced 또는
+Comprehensive 설명을 생성한다. 이처럼
 시각 정보의 추출 단계를 공유한 뒤 언어화 단계만 분기함으로써,
-비교 대상이 사실 추출 품질이 아니라 서술 상세도가 되도록 한다.
+비교 대상이 사실 추출 품질이 아니라 target의 information
+budget과 evidence coverage가 되도록 한다.
 
-\paragraph{포괄적 설명.}
-Long prompt는 제공된 모든 가시 사실과 affordance를 하나의
-자기완결적 장문에 포함하도록 요구한다. 표의 행과 열, 요소 좌표를
-보존하고, 관찰된 사실과 아직 실행하지 않은 행동의 예상 결과를
-구분한다. 이미지 해시에 따라 전개 순서와 문체를 결정론적으로
-변주한다. 반복 퇴화가 발생한 25건을 제거한 뒤 147,967개의 설명을
-얻었으며 평균 길이는 3,656자이다.
-
-\paragraph{간결한 설명.}
-Short prompt는 3--5문장, 약 90--130단어로 페이지 유형, 주된 목적,
+\paragraph{Concise.}
+Concise prompt는 3--5문장, 약 90--130단어로 페이지 유형, 주된 목적,
 가장 중요한 가시 상태, 최대 두 개의 핵심 상호작용 목표를
 서술하도록 한다. 출력에 행동 요소가 등장하면 제공된 좌표를 반드시
-함께 보존한다. 따라서 Long 조건이 정보를 열거한다면 Short 조건은
-정보를 선택하고 압축한다. 최종 데이터는 143,097건이며 평균
+함께 보존한다. 즉 화면 전체를 열거하지 않고 salient evidence를
+선택하고 압축한다. 최종 데이터는 143,097건이며 평균
 110.2단어, 4.24문장이다.
-표 \ref{tab:data}의 전체 구축 규모에는 각 조건의 유효 샘플 수를
-그대로 사용한다. 상세도의 통제 비교에는 Short와 Long이 모두
-유효한 동일 screenshot의 교집합만 사용하며, 이 subset에서는
-학습 sample 수와 update 수를 맞춘다.
+
+\paragraph{Balanced.}
+Balanced prompt는 6--9문장, 약 170--230단어를 목표로 한다.
+페이지 목적과 현재 상태를 유지하면서 각 주요 section에서 대표
+사실을 선택하고, primary task flow를 반드시 포함한 뒤 서로 다른
+기능을 대표하는 interaction을 추가한다. interaction goal은
+3--4개, actionable element는 최대 6개로 제한하며, 언급한 모든
+행동 요소에는 Stage 1 좌표를 붙인다. 표와 반복 목록은 header와
+대표 값만 포함하고, 선택한 핵심 interaction 1--2개의 expected
+결과만 추측형으로 기술한다. Concise의 모든 항목을 sample마다
+복사하도록 강제하지는 않지만, primary task를 부차적인 navigation
+요소보다 우선하여 평균적으로 중간 수준의 coverage를 형성한다.
+
+\paragraph{Comprehensive.}
+Comprehensive prompt는 제공된 가시 사실과 affordance를 하나의
+자기완결적 장문에 거의 모두 포함하도록 요구한다. 표의 행과 열,
+요소 좌표를 보존하고, 관찰된 사실과 아직 실행하지 않은 행동의
+예상 결과를 구분한다. 이미지 해시에 따라 전개 순서와 문체를
+결정론적으로 변주하므로, 이 조건은 높은 coverage와 함께 다양한
+information ordering을 갖는 실용적 recipe다. 반복 퇴화가 발생한
+25건을 제거한 뒤 147,967개의 설명을 얻었으며 평균 길이는
+3,656자이다.
+
+세 조건은 동일 screenshot 수를 목표로 하지만 target-token 수는
+의도적으로 다르다. 따라서 주 비교는 token-matched length
+ablation이 아니라 실제 verbalization recipe의 information
+completeness 비교이다. 최종 비교에는 세 설명이 모두 유효한 동일
+screenshot의 교집합을 사용하고 sample 수와 update 수를 맞춘다.
+추가로 Grounding-only 조건을 두어 description이 없는 공통
+grounding mixture와 비교한다.
 
 \input{tables/data_composition}
 
 \paragraph{프로그램 기반 검증.}
-Short에는 좌표ㆍ길이 제약 검증을 적용하고, Long에는 반복 퇴화
-필터를 적용한다. 모든 Short 생성 결과의 좌표를 Stage 1 좌표
-집합과 대조한다.
+모든 조건에서 생성 좌표가 Stage 1 좌표 집합의 부분집합인지
+검사한다. Concise와 Balanced에는 길이ㆍ문장 수ㆍactionable-element
+budget 검사를 추가하고, Comprehensive에는 반복 퇴화 필터를
+적용한다. 현재 완료된 Concise 생성 결과의 좌표를 대조한 결과,
 약 148K개 입력 가운데 두 차례 재시도 후에도 약 4.9K건이 규칙을
 위반하였다. 이 중 약 4.7K건은 존재하지 않는 좌표를 생성했고,
 나머지는 문장 수 또는 단어 수 제약을 어겼다. 최종 집합에는 약
@@ -73,14 +94,17 @@ AutoGUI \citep{li2025autogui}, 그리고 존재하지 않는 요소에 좌표를
 생성하는 fabricated hallucination을 보고한 GUI-HalluBench
 \citep{zhang2026guihallu}와 일관된다.
 
-\subsection{동일한 그라운딩 혼합}
+\subsection{공통 그라운딩과 비교 조건}
 
 각 설명 집합을 동일한 1.2M개의 영어 UGround 예제와 혼합한다
 \citep{gou2025uground}. UGround는 GUI 요소를 가리키는 표현과
 해당 요소의 위치를 연결하는 시각 그라운딩 supervision을 제공한다.
 본 연구에서는 이를 동일한 0--999 좌표계의 한 점으로 표현한다.
-두 혼합 데이터는 seed 42와 동일한
+세 혼합 데이터는 seed 42와 동일한
 \texttt{prompt}/\texttt{completion}/\texttt{images} 스키마를 사용한다.
-그라운딩이 두 PT 데이터의 약 90\%를 차지하므로, Long 조건이
-설명에서 더 많은 좌표를 포함한다는 이유만으로 별도의 그라운딩
-예제를 더 받지는 않는다.
+Grounding-only는 이 1.2M 예제만 학습한다. 따라서
+Grounding-only--Concise는 선택적 description의 추가 효과,
+Grounding-only--Comprehensive는 포괄적 description의 추가 효과,
+Concise--Balanced--Comprehensive는 증가하는 information budget의
+효과를 각각 보여준다. 더 포괄적인 조건이 description 안에서 많은
+좌표를 언급하더라도 별도의 UGround 예제를 더 받지는 않는다.

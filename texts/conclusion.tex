@@ -1,9 +1,12 @@
 \section{결론}
 
-본 연구는 웹 GUI 모델 학습에서 충분히 규정되지 않았던 선택, 즉
-사전학습 시 웹페이지를 간결하게 요약할 것인지 포괄적으로 서술할
-것인지를 통제된 실험으로 정식화한다. PT 이후 IT, Action,
-Trajectory까지 각 조건을 추적함으로써 즉각적인 웹 표현 품질뿐 아니라 학습된
-신호의 지속성과 최종 에이전트에 대한 효용을 측정한다. 완료된
-평가는 풍부한 웹페이지 서술이 웹 에이전트의 유용한 기반인지,
-아니면 후속 단계가 대체하는 고비용 신호인지를 밝힐 것이다.
+본 연구는 웹 GUI pretraining에서 자연어 target을 어떻게 구성할지의
+문제를 text-rich UI evidence에 대한 supervision coverage로
+정식화한다. 동일한 화면과 구조화 evidence에서 Concise, Balanced,
+Comprehensive verbalization을 만들고 Grounding-only 기준선과
+비교한다. Stage 1 기반 coverage와 omission-targeted diagnostic,
+공개 benchmark, PT부터 Trajectory까지의 checkpoint 평가를 연결해
+어느 information budget이 웹 이해와 agent adaptation에 유용한지
+검증한다. 이 설계는 긴 출력의 우월성을 전제하지 않으며,
+포괄성의 이득과 target-token 비용ㆍ노이즈 사이의 균형을 밝히는
+것을 목표로 한다.

@@ -1,18 +1,18 @@
 \begin{table}[t]
 \centering
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{lrr}
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{lrrrr}
 \toprule
- & Short & Long \\
+ & Ground. & Concise & Balanced & Compr. \\
 \midrule
-화면 설명 & 143K & 148K \\
-공통 그라운딩 & 1.2M & 1.2M \\
-전체 PT 예제 & 1.37M & 1.38M \\
+화면 설명 & -- & 143K & 구축 중 & 148K \\
+공통 그라운딩 & 1.2M & 1.2M & 1.2M & 1.2M \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{사전학습 데이터 구성.} 두 조건은 같은 그라운딩
-데이터와 좌표계를 공유한다. 표는 전체 구축 규모이며, 통제 비교는
-두 설명이 모두 유효한 동일 화면의 교집합에서 수행한다.}
+\caption{\textbf{사전학습 데이터 구성.} 네 조건은 같은 grounding
+pool과 좌표계를 사용한다. 최종 통제 비교에서는 세 설명이 모두
+유효한 동일 화면의 교집합과 동일 update 수를 사용한다. Balanced의
+최종 규모와 길이ㆍcoverage 통계는 전체 생성 후 보고한다.}
 \label{tab:data}
 \end{table}
