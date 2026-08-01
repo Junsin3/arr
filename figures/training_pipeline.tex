@@ -1,38 +1,46 @@
+\definecolor{stagegray}{RGB}{240,240,242}
+\definecolor{shortblue}{RGB}{214,231,247}
+\definecolor{stagegreen}{RGB}{215,238,222}
+\definecolor{longorange}{RGB}{252,231,206}
+
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
   font=\small,
   stage/.style={draw, rounded corners=2pt, align=center,
-                minimum width=20mm, minimum height=8mm},
+                text width=22mm, minimum height=10mm, inner sep=2pt},
   arrow/.style={-{Latex[length=2mm]}, semithick},
   row/.style={font=\small\bfseries, anchor=east}
 ]
-\node[row] at (-0.3,0) {Grounding-only};
-\node[row] at (-0.3,-1.0) {Concise};
-\node[row] at (-0.3,-2.0) {Balanced};
-\node[row] at (-0.3,-3.0) {Comprehensive};
+\node[row] at (-0.3, 0)    {No-Pretrain};
+\node[row] at (-0.3,-1.5)  {Short};
+\node[row] at (-0.3,-3.0)  {Medium};
+\node[row] at (-0.3,-4.5)  {Long};
 
 \foreach \r in {0,1,2,3}
-  \node[stage,fill=stagegray] (base\r) at (0.9,-\r) {Base};
+  \node[stage,fill=stagegray] (base\r) at (1.2,{-1.5*\r}) {Base};
 
-\node[stage,fill=stagegray] (pt0) at (3.6,0) {Grounding PT};
-\node[stage,fill=shortblue] (pt1) at (3.6,-1) {Grounding\\+ Concise};
-\node[stage,fill=stagegreen] (pt2) at (3.6,-2) {Grounding\\+ Balanced};
-\node[stage,fill=longorange] (pt3) at (3.6,-3) {Grounding\\+ Comprehensive};
+\node[stage,fill=shortblue]  (pt1) at (4.2,-1.5) {Grounding\\+ Short};
+\node[stage,fill=stagegreen] (pt2) at (4.2,-3.0) {Grounding\\+ Medium};
+\node[stage,fill=longorange] (pt3) at (4.2,-4.5) {Grounding\\+ Long};
 
 \foreach \r in {0,1,2,3} {
-  \node[stage,fill=stagegray] (it\r) at (6.3,-\r) {IT};
-  \node[stage,fill=stagegray] (act\r) at (8.8,-\r) {Action};
-  \node[stage,fill=stagegray] (traj\r) at (11.5,-\r) {Trajectory};
-  \draw[arrow] (base\r) -- (pt\r);
-  \draw[arrow] (pt\r) -- (it\r);
-  \draw[arrow] (it\r) -- (act\r);
-  \draw[arrow] (act\r) -- (traj\r);
+  \node[stage,fill=stagegray] (it\r)   at (7.2,{-1.5*\r})  {IT};
+  \node[stage,fill=stagegray] (traj\r) at (10.2,{-1.5*\r}) {Trajectory};
+  \draw[arrow] (it\r) -- (traj\r);
 }
+
+\foreach \r in {1,2,3} {
+  \draw[arrow] (base\r) -- (pt\r);
+  \draw[arrow] (pt\r)   -- (it\r);
+}
+\draw[arrow,dashed] (base0) -- node[above,font=\scriptsize]{no caption PT} (it0);
+
 \end{tikzpicture}
-\caption{\textbf{통제된 네 학습 경로.} PT의 description
-information budget만 달리하고, 이후 IT, Action, Trajectory의
-sample과 순서를 동일하게 유지한다. 각 단계의 checkpoint를 평가해
-초기 supervision의 효과와 지속성을 분리한다.}
+\caption{\textbf{Four controlled training paths.}
+Only the description information budget in the PT stage varies;
+the samples and order of the IT and Trajectory stages are identical across paths.
+We evaluate checkpoints at every stage to separate the effect of the initial
+supervision from its persistence.}
 \label{fig:pipeline}
 \end{figure*}
