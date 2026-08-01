@@ -1,1 +1,147 @@
-\section{데이터 생성 프롬프트 및 출력 스키마}
+\section{상세 데이터 생성 방법}
+\label{app:data_generation}
+
+본 연구는 웹 스크린샷의 정보를 서로 다른 포괄성 수준으로 언어화하기
+위해 2단계 합성 파이프라인을 사용한다. Stage 1에서는 스크린샷과
+구조화된 웹 정보를 바탕으로 화면에서 검증 가능한 evidence를 추출하고,
+Stage 2에서는 동일한 evidence를 서로 다른 information budget으로
+언어화하여 Info-S, Info-M, Info-L을 생성한다. 세 조건은 동일한
+스크린샷과 Stage 1 출력을 공유한다. 따라서 조건 간 차이는 사실 추출
+과정이 아니라, 추출된 정보 중 어느 범위를 학습 target에 포함하는지에서
+발생한다.
+
+\subsection{입력과 Stage 1 Evidence 추출}
+
+각 예제의 입력은 현재 viewport의 스크린샷, DOM tree, accessibility
+tree로 구성된다. 스크린샷은 실제 시각 상태를 판단하는 주된 근거이며,
+DOM과 accessibility tree는 텍스트, 역할, 상태, 클릭 가능 여부와
+bounding box를 확인하는 보조 근거다. DOM에 존재하더라도 화면 밖에
+있거나 다른 레이어에 가려진 요소는 현재 가시 evidence로 간주하지
+않는다.
+
+Stage 1은 다음 항목을 구조화한다.
+\begin{itemize}
+    \item \textbf{Page type and purpose}: 검색, 로그인, 상품 탐색,
+          예약 또는 설정 등 현재 인터페이스의 유형과 목적,
+    \item \textbf{Visible facts}: 제목, 본문, 메뉴, 라벨, 가격, 날짜,
+          수치, 경고, 선택값과 입력값,
+    \item \textbf{Interface state}: 선택, 비활성화, 체크, 펼침, 입력,
+          팝업과 같은 현재 상태,
+    \item \textbf{Affordances}: 클릭, 입력, 선택 및 제출이 가능한
+          요소의 이름, 행동 유형, 좌표와 예상 결과.
+\end{itemize}
+행동의 예상 결과는 아직 관찰되지 않은 예측이므로 현재 화면의 사실과
+분리하여 저장하며, 확인할 수 없는 목적지나 후속 내용을 생성하지 않는다.
+
+\subsection{가시성 및 팝업 처리}
+
+구조화 트리는 화면 밖 요소, 숨겨진 요소와 팝업에 가려진 배경 요소를
+포함할 수 있다. 이를 줄이기 위해 모델은 스크린샷을 보고 DOM 텍스트가
+현재 보이는지 판단한다. 배경을 가리고 상호작용을 차단하는 모달이
+표시되면 모달의 내용과 행동을 우선하며, 가려진 배경 요소를 현재 사용
+가능한 affordance로 기술하지 않는다. 반면 지도나 검색 레이어처럼
+레이어 자체가 화면의 주된 기능이면 이를 닫아야 하는 방해 요소로
+취급하지 않는다. 배너, 토스트와 작은 메뉴는 현재 상태나 가능한 행동을
+바꿀 때만 포함한다.
+
+\subsection{좌표 추출과 정규화}
+
+합성 모델이 픽셀만 보고 좌표를 추정하지 않도록 DOM 또는 accessibility
+tree의 bounding box를 사용한다. 이미지의 너비와 높이가 $W,H$이고
+요소의 bounding box가 $(x,y,w,h)$일 때 중심점을 다음과 같이
+$0$--$999$ 좌표계로 변환한다.
+\begin{equation}
+\hat{x}=\operatorname{clip}\!\left(
+\operatorname{round}\left(\frac{x+w/2}{W}\times999\right),0,999\right),
+\end{equation}
+\begin{equation}
+\hat{y}=\operatorname{clip}\!\left(
+\operatorname{round}\left(\frac{y+h/2}{H}\times999\right),0,999\right).
+\end{equation}
+Stage 2는 Stage 1에서 제공한 좌표를 그대로 인용하며 새 좌표를 추정,
+반올림 또는 수정하지 않는다.
+
+\subsection{Stage 2: 포괄성 수준별 Verbalization}
+
+Stage 2는 스크린샷과 공통 Stage 1 evidence를 하나의 plain-text
+description으로 변환한다. 세 조건 모두 동일한 형식을 사용하되,
+target에 담는 평균 evidence coverage를 달리한다. 각 sample에서
+선택된 evidence 집합의 엄격한 포함관계는 강제하지 않지만, 페이지
+목적과 primary task flow는 모든 조건에서 우선한다.
+
+\paragraph{Info-S (Concise).}
+3--5문장과 약 90--130단어로 페이지 유형, 주된 목적, 가장 중요한
+가시 내용 또는 상태와 최대 두 개의 interaction goal을 기술한다.
+화면 전체를 열거하지 않고 화면을 대표하는 salient evidence를
+선택한다. 행동 요소가 언급되면 해당 Stage 1 좌표를 함께 제공한다.
+
+\paragraph{Info-M (Balanced).}
+6--9문장과 약 170--230단어로 페이지 목적과 현재 상태, 각 주요
+section의 대표 사실과 primary task를 기술한다. 약 3--4개의
+interaction goal과 최대 6개의 actionable element를 포함하며, 중앙
+입력창, 제출 버튼과 주요 CTA를 utility navigation보다 우선한다.
+표와 반복 목록은 header와 대표 값을 기술하고, 핵심 행동 1--2개의
+예상 결과만 추측형으로 표현한다.
+
+\paragraph{Info-L (Comprehensive).}
+Stage 1의 visible facts와 affordances를 가능한 한 빠짐없이 하나의
+자기완결적 장문으로 변환한다. 세부 텍스트, 수치, 상태, section,
+요소 기능, 좌표, 가능한 행동과 예상되는 상태 변화를 함께 기술하고,
+표와 목록도 개별 항목과 값을 보존한다. 관찰된 사실은 사실형으로,
+행동 결과는 ``may'', ``is expected to''와 같은 불확실성 표현으로
+구분한다. 공간, 기능, 사용자 목표 또는 콘텐츠 순서 등 전개 방식은
+달라질 수 있지만 포함해야 하는 evidence의 범위는 유지한다.
+
+\begin{table}[t]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccc}
+\toprule
+ & Info-S & Info-M & Info-L \\
+\midrule
+Visible evidence & Salient & Representative & Near-complete \\
+Interaction goals & $\leq2$ & 3--4 & Near-complete \\
+Actionable elements & Selected & $\leq6$ & Near-complete \\
+Expected outcomes & Minimal & Key actions & Most actions \\
+Target length & 90--130 & 170--230 & Unbounded \\
+\bottomrule
+\end{tabular}
+}
+\caption{세 webpage verbalization 조건의 목표 information budget.
+길이 단위는 영문 단어 수이며, Info-L은 완전성을 우선하므로 고정된
+길이 상한을 두지 않는다.}
+\label{tab:appendix_info_levels}
+\end{table}
+
+이 비교에서 길이는 독립적으로 조작된 변수가 아니다. 더 많은
+evidence를 언어화할수록 target token 수도 함께 증가한다. 따라서
+Info-S--Info-M--Info-L은 길이만 다른 caption이 아니라 서로 다른
+information coverage를 갖는 실용적인 supervision recipe다.
+
+\subsection{자동 검증과 Rejection}
+
+Stage 1과 Stage 2 출력에는 다음 검사를 적용한다.
+\begin{itemize}
+    \item 출력 좌표가 해당 Stage 1 좌표 집합에 포함되는지 확인한다.
+    \item 행동 가능하다고 기술된 요소에 정확한 좌표가 있는지 확인한다.
+    \item Stage 1에 없는 텍스트, 값 또는 요소가 생성되지 않았는지
+          확인한다.
+    \item 별개의 라벨이나 메뉴가 새로운 복합 개념으로 병합되지
+          않았는지 확인한다.
+    \item 예상 결과가 관찰된 사실처럼 단정되지 않았는지 확인한다.
+    \item Info-S와 Info-M의 단어, 문장 및 요소 budget을 확인한다.
+    \item Info-L의 문장 및 evidence 반복 퇴화를 확인한다.
+\end{itemize}
+검증에 실패한 출력은 제한된 횟수만큼 재생성하며, 이후에도 좌표 발명,
+형식 위반 또는 반복이 남은 예제는 최종 집합에서 제거한다.
+
+\subsection{통제된 비교 조건}
+
+Description supervision의 추가 효과와 information budget의 효과를
+분리하기 위해 Grounding-only, Info-S, Info-M, Info-L의 네 조건을
+구성한다. Description 조건에는 모두 공통 grounding 데이터를 혼합하고,
+모두 생성에 성공한 동일한 screenshot 교집합을 사용한다. 이미지 수,
+학습 update, backbone과 후속 instruction tuning, action warm-up 및
+trajectory training은 동일하게 유지한다. Grounding-only와 각 Info
+조건의 차이는 verbal supervision의 추가 효과를, Info-S--Info-M--Info-L
+차이는 증가하는 평균 information budget의 효과를 나타낸다.
