@@ -1,26 +1,23 @@
 \begin{table*}[t]
 \centering
 \small
-\resizebox{\textwidth}{!}{
-\begin{tabular}{lcccccccc}
+\begin{tabular}{lccccccc}
 \toprule
-모델 & VWB-U $\uparrow$ & VWB-G $\uparrow$ & WebSRC $\uparrow$ &
-WebClick $\uparrow$ & ScreenSpot-v2 $\uparrow$ & Korean Web $\uparrow$ &
-DocVQA $\uparrow$ & ChartQA $\uparrow$ \\
+& \multicolumn{3}{c}{Grounding} & \multicolumn{3}{c}{Web understanding} & \multicolumn{1}{c}{Gen.} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-8}
+Pretraining supervision & Screenspot$^{\dagger}$ & GroundUI$^{\dagger}$ & VisualWebBench-G & VWB-U & WebSRC & Korean Web & DocVQA \\
 \midrule
-Grounding-only PT & -- & -- & -- & -- & -- & -- & -- & -- \\
-Concise PT & -- & -- & -- & -- & -- & -- & -- & -- \\
-Balanced PT & -- & -- & -- & -- & -- & -- & -- & -- \\
-Comprehensive PT & -- & -- & -- & -- & -- & -- & -- & -- \\
-\midrule
-Grounding-only + IT & -- & -- & -- & -- & -- & -- & -- & -- \\
-Concise + IT & -- & -- & -- & -- & -- & -- & -- & -- \\
-Balanced + IT & -- & -- & -- & -- & -- & -- & -- & -- \\
-Comprehensive + IT & -- & -- & -- & -- & -- & -- & -- & -- \\
+Grounding-only & 70.83 & 69.90 & 50.19 & -- & -- & -- & -- \\
+Info-L  & 81.92 & 76.00 & 68.99 & -- & -- & -- & -- \\
+Info-M & 82.86 & 80.30 & 62.21 & -- & -- & -- & -- \\
+Info-H & \textbf{83.25} & \textbf{80.60} & \textbf{75.78} & -- & -- & -- & -- \\
 \bottomrule
-\end{tabular}}
-\caption{\textbf{웹 이해, 그라운딩 및 일반화 결과.} VWB-U와 VWB-G는
-각각 VisualWebBench의 understanding과 grounding을 뜻한다. 표의
-대시는 진행 중인 평가 결과를 입력하기 위한 자리표시자이다.}
+\end{tabular}
+\caption{\textbf{Description coverage에 따른 pretraining 결과.}
+Info-L/M/H는 각각 $\bar\rho=0.13/0.44/0.98$의 description coverage 조건이다.
+모든 조건은 동일한 스크린샷 집합과 grounding 데이터를 공유하며,
+description coverage만 다르다. SS-v2는 ScreenSpot-v2,
+VWB-G/U는 VisualWebBench의 grounding/understanding을 가리킨다.
+$^{\dagger}$ mobile과 desktop split의 평균.}
 \label{tab:main}
 \end{table*}
